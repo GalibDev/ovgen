@@ -1,21 +1,46 @@
-import Dexie, { type Table } from 'dexie';
+import Dexie from 'dexie';
 import type { Habit, Progress } from '../../types';
 class OvgenDB extends Dexie {
-  habits!: Table<Habit, string>;
-  progress!: Table<Progress, string>;
-  meta!: Table<{ key: string; value: boolean }, string>;
-  reminderDeliveries!: Table<{ key: string; date: string }, string>;
-  constructor() {
-    super('ovgen');
-    this.version(1).stores({
-      habits: 'id,category,createdAt',
-      progress: 'key,habitId,date,[habitId+date]',
-      meta: 'key',
-    });
-    this.version(2).stores({ reminderDeliveries: 'key,date' });
+  get habits() {
+    return this.table<Habit, string>('habits');
+  }
+  get progress() {
+    return this.table<Progress, string>('progress');
+  }
+  get meta() {
+    return this.table<{ key: string; value: boolean | string }, string>('meta');
+  }
+  constructor(create = false) {
+    super('ovgen', { autoOpen: false });
+    // Existing installations are opened at their installed schema version.
+    // Reminder receipts use the existing metadata store, avoiding upgrade locks.
+    if (create)
+      this.version(1).stores({
+        habits: 'id,category,createdAt',
+        progress: 'key,habitId,date,[habitId+date]',
+        meta: 'key',
+      });
   }
 }
-export const db = new OvgenDB();
+export let db = new OvgenDB();
+let opening: Promise<void> | undefined;
+export function openDatabase() {
+  if (!opening)
+    opening = (async () => {
+      try {
+        await db.open();
+      } catch (error) {
+        if (!(error instanceof Error) || error.name !== 'NoSuchDatabaseError') throw error;
+        db.close();
+        db = new OvgenDB(true);
+        await db.open();
+      }
+    })().catch((error) => {
+      opening = undefined;
+      throw error;
+    });
+  return opening;
+}
 export const localDate = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 export const dayDate = (d: string) => new Date(`${d}T12:00:00`);
@@ -56,16 +81,18 @@ export const toggleStep = (h: Habit, d: string, id: string) =>
     steps: p.steps.includes(id) ? p.steps.filter((s) => s !== id) : [...p.steps, id],
   }));
 export async function deleteHabit(id: string) {
-  await db.transaction('rw', db.habits, db.progress, db.reminderDeliveries, async () => {
+  await db.transaction('rw', db.habits, db.progress, db.meta, async () => {
     await db.progress.where('habitId').equals(id).delete();
-    const deliveries = await db.reminderDeliveries.toArray();
-    await db.reminderDeliveries.bulkDelete(
-      deliveries.filter((d) => d.key.startsWith(id + ':')).map((d) => d.key),
-    );
+    await db.meta
+      .where(':id')
+      .startsWith('reminder:' + id + ':')
+      .delete();
     await db.habits.delete(id);
   });
 }
 export async function seed() {
+  await openDatabase();
+  if (await db.meta.get('seeded')) return;
   await db.transaction('rw', db.habits, db.meta, async () => {
     if (await db.meta.get('seeded')) return;
     if ((await db.habits.count()) === 0) {

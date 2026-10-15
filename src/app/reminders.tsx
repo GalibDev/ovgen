@@ -174,29 +174,23 @@ export function useReminders() {
         const delivered: Habit[] = [];
         for (const h of candidates) {
           if (disposed) break;
-          const claimed = await db.transaction(
-            'rw',
-            db.habits,
-            db.progress,
-            db.reminderDeliveries,
-            async () => {
-              const current = await db.habits.get(h.id);
-              if (
-                !current?.reminder?.enabled ||
-                current.reminder.time !== h.reminder?.time ||
-                !scheduled(current, date)
-              )
-                return false;
-              const key = `${h.id}:${date}:${current.reminder.time}`;
-              if (
-                (await db.reminderDeliveries.get(key)) ||
-                isComplete(current, await db.progress.get(`${h.id}:${date}`))
-              )
-                return false;
-              await db.reminderDeliveries.put({ key, date });
-              return true;
-            },
-          );
+          const claimed = await db.transaction('rw', db.habits, db.progress, db.meta, async () => {
+            const current = await db.habits.get(h.id);
+            if (
+              !current?.reminder?.enabled ||
+              current.reminder.time !== h.reminder?.time ||
+              !scheduled(current, date)
+            )
+              return false;
+            const key = `reminder:${h.id}:${date}:${current.reminder.time}`;
+            if (
+              (await db.meta.get(key)) ||
+              isComplete(current, await db.progress.get(`${h.id}:${date}`))
+            )
+              return false;
+            await db.meta.put({ key, value: date });
+            return true;
+          });
           if (claimed) {
             delivered.push(h);
             if (browserNotifications)
@@ -209,7 +203,13 @@ export function useReminders() {
           }
         }
         if (!disposed && delivered.length) setDue(delivered);
-        await db.reminderDeliveries.where('date').below(shiftDate(date, -30)).delete();
+        await db.meta
+          .where(':id')
+          .startsWith('reminder:')
+          .filter(
+            (receipt) => typeof receipt.value === 'string' && receipt.value < shiftDate(date, -30),
+          )
+          .delete();
       } catch {
         /* Retry on the next tick without interrupting habit tracking. */
       } finally {

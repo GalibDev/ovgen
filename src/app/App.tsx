@@ -1,3 +1,4 @@
+import { AppUpdate } from './app-update';
 import { HabitCalendar } from '../components/habits/habit-calendar';
 import { ReminderSettings, ReminderBanner, useReminders } from './reminders';
 import { habitTone } from '../lib/theme';
@@ -584,6 +585,7 @@ function Shell() {
   }, [location.pathname]);
   return (
     <div className="app-shell">
+      <AppUpdate />
       <ReminderBanner due={reminders.due} dismiss={reminders.dismiss} />
       <aside className="desktop-brand">
         <Link to="/">
@@ -676,17 +678,41 @@ function Shell() {
 }
 export default function App() {
   const [ready, setReady] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
   useEffect(() => {
+    let active = true;
+    const timer = setTimeout(() => {
+      if (active)
+        setError(
+          'Opening your saved habits is taking longer than expected. Close other Ovgen tabs, then retry. Your data has not been deleted.',
+        );
+    }, 12000);
     seed()
-      .then(() => setReady(true))
-      .catch(() => setError(true));
+      .then(() => {
+        if (active) {
+          clearTimeout(timer);
+          setError('');
+          setReady(true);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          clearTimeout(timer);
+          setError(
+            'Your browser could not open local storage. Please allow site storage and try again. Your saved data has not been reset.',
+          );
+        }
+      });
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, []);
   if (error)
     return (
       <div className="empty">
-        <h2>Local storage is unavailable</h2>
-        <p>Allow browser storage, then reload to open Ovgen.</p>
+        <h2>Let’s reopen your growth space</h2>
+        <p>{error}</p>
         <Button onClick={() => location.reload()}>Try again</Button>
       </div>
     );
