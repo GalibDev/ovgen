@@ -1386,14 +1386,6 @@ main {
 .color-preview span:nth-child(4) {
   background: var(--tone-c6b2fa, #c6b2fa);
 }
-.reorder-hint {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  color: #80718e;
-  font-size: 11px;
-  margin: 12px 0;
-}
 .sortable-habit {
   touch-action: pan-y;
   -webkit-touch-callout: none;
@@ -1403,21 +1395,6 @@ main {
   filter: drop-shadow(0 10px 16px #6840db30);
   cursor: grabbing;
 }
-.drag-handle {
-  position: absolute;
-  left: 5px;
-  top: 7px;
-  color: #a99abd;
-  padding: 3px;
-  display: grid;
-  place-items: center;
-  cursor: grab;
-  z-index: 2;
-  touch-action: none;
-}
-.drag-handle:focus-visible {
-  outline: 2px solid #6840db;
-}
 .sortable-habit .habit-card {
   user-select: none;
   -webkit-user-select: none;
@@ -1425,4 +1402,11 @@ main {
 .sortable-habit .habit-card input {
   user-select: text;
   -webkit-user-select: text;
+}
+
+.settings-link-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
 }

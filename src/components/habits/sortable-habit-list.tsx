@@ -16,7 +16,6 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical } from 'lucide-react';
 import type { Habit, Progress } from '../../types';
 import { usePreferences } from '../../stores/preferences';
 import { HabitCard } from './habit-card';
@@ -42,16 +41,11 @@ function SortableHabit({
         position: 'relative',
       }}
       className={isDragging ? 'sortable-habit dragging' : 'sortable-habit'}
+      {...attributes}
+      aria-label={`Reorder ${habit.name}`}
       {...listeners}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <button
-        className="drag-handle"
-        aria-label={`Reorder ${habit.name}. Press Space, then arrow keys, then Space to drop.`}
-        {...attributes}
-      >
-        <GripVertical size={17} />
-      </button>
       <HabitCard habit={habit} progress={progress} date={date} />
     </div>
   );
@@ -85,10 +79,6 @@ export function SortableHabitList({
   }
   return (
     <>
-      <p className="reorder-hint">
-        <GripVertical size={13} />
-        Hold a card to drag and reorder
-      </p>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorder}>
         <SortableContext items={habits.map((h) => h.id)} strategy={verticalListSortingStrategy}>
           <div className="habit-list">

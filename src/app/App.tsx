@@ -28,6 +28,7 @@ import {
   ShieldCheck,
   Heart,
   ChevronRight,
+  Settings,
 } from 'lucide-react';
 import { db, seed, localDate, dayDate, scheduled, percent, deleteHabit } from '../lib/db';
 import { useAppStore } from '../stores/app';
@@ -514,9 +515,15 @@ function Profile() {
           <h1>My profile</h1>
           <p>A little space, just for you.</p>
         </div>
+        <Link to="/settings" className="add-button" aria-label="Settings">
+          <Settings size={25} />
+        </Link>
       </header>
       <Link className="profile-link panel" to="/settings">
-        <span>Settings · Appearance</span>
+        <span className="settings-link-label">
+          <Settings size={21} />
+          Settings · Appearance
+        </span>
         <ChevronRight size={19} />
       </Link>
       <section className="panel profile-card">
