@@ -19,7 +19,11 @@ export default defineConfig({
         start_url: '/',
         icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
       },
-      workbox: { navigateFallback: '/index.html', globPatterns: ['**/*.{js,css,html,svg,woff2}'] },
+      workbox: {
+        importScripts: ['/notification-events.js'],
+        navigateFallback: '/index.html',
+        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
+      },
     }),
   ],
 });

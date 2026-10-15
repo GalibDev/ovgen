@@ -52,6 +52,8 @@ function Builder({ original }: { original?: Habit }) {
       return setError('Add at least one step and name every step.');
     if (['count', 'duration'].includes(h.tracking) && (!Number.isFinite(h.target) || h.target <= 0))
       return setError('Target must be greater than zero.');
+    if (h.reminder?.enabled && !/^([01]\d|2[0-3]):[0-5]\d$/.test(h.reminder.time))
+      return setError('Choose a valid reminder time.');
     setSaving(true);
     try {
       await db.habits.put({
@@ -310,6 +312,36 @@ function Builder({ original }: { original?: Habit }) {
               </button>
             ))}
           </div>
+        </section>
+        <section className="panel">
+          <h2>Gentle reminder</h2>
+          <label className="toggle-row">
+            <span>Remind me on scheduled days</span>
+            <input
+              type="checkbox"
+              role="switch"
+              checked={!!h.reminder?.enabled}
+              onChange={(e) =>
+                patch({
+                  reminder: { enabled: e.target.checked, time: h.reminder?.time || '09:00' },
+                })
+              }
+            />
+          </label>
+          {h.reminder?.enabled && (
+            <label>
+              Local time
+              <input
+                type="time"
+                required
+                value={h.reminder.time}
+                onChange={(e) => patch({ reminder: { enabled: true, time: e.target.value } })}
+              />
+            </label>
+          )}
+          <p className="muted reminder-limit">
+            Web reminders are shown while Ovgen is open. Completed habits are skipped.
+          </p>
         </section>
         {error && (
           <p role="alert" className="error">

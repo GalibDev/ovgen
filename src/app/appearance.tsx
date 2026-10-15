@@ -1,10 +1,26 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { usePreferences } from '../stores/preferences';
 import { themeColors } from '../styles/palette';
 // Preserve white surfaces and near-neutral text; adjust the colored design tokens.
 export function useColorDepth() {
   const depth = usePreferences((s) => s.colorDepth);
+  const theme = usePreferences((s) => s.theme);
+  const [systemDark, setSystemDark] = useState(
+    () => window.matchMedia('(prefers-color-scheme: dark)').matches,
+  );
   useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const update = () => setSystemDark(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  const dark = theme === 'dark' || (theme === 'system' && systemDark);
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', dark ? '#15121e' : '#6B58E8');
     for (const hex of themeColors) {
       const rgb = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
       const hi = Math.max(...rgb),
@@ -18,22 +34,56 @@ export function useColorDepth() {
             ? rgb.map((v) => v + (1 - v) * -amount * 0.45)
             : rgb.map((v) => Math.max(0, v - amount * (1 - v) * 0.38));
       }
+      if (dark) {
+        const average = (hi + lo) / 2;
+        if (lo > 0.67 && hi > 0.86) {
+          values = chroma > 0.06 ? [0.17, 0.13, 0.25] : [0.13, 0.115, 0.17];
+        } else if (chroma < 0.18) {
+          values = average < 0.35 ? [0.92, 0.9, 0.96] : [0.72, 0.68, 0.8];
+        } else if (average < 0.45) {
+          values = rgb.map((v) => Math.min(1, v * 0.75 + 0.28));
+        }
+      }
+      if (dark) {
+        values = values.map((v) => Math.min(1, Math.max(0, v + (50 - depth) * 0.0008)));
+      }
       const alpha = hex.length === 8 ? parseInt(hex.slice(6), 16) / 255 : 1;
       document.documentElement.style.setProperty(
         `--tone-${hex}`,
         `rgba(${values.map((v) => Math.round(v * 255)).join(',')},${alpha})`,
       );
     }
-    document.documentElement.style.setProperty('--habit-shade', depth < 50 ? 'white' : '#24113f');
+    document.documentElement.style.setProperty(
+      '--habit-shade',
+      dark ? '#ede4ff' : depth < 50 ? 'white' : '#24113f',
+    );
     document.documentElement.style.setProperty('--habit-shift', Math.abs(depth - 50) * 0.5 + '%');
     document.documentElement.style.setProperty('--habit-tint', `${18 + (depth - 50) * 0.2}%`);
-  }, [depth]);
+    document.documentElement.style.setProperty(
+      '--surface',
+      dark
+        ? `rgb(${[33, 29, 44].map((v) => Math.round(v + (50 - depth) * 0.18)).join(',')})`
+        : 'white',
+    );
+  }, [depth, dark]);
 }
 export function AppearanceSettings() {
-  const { colorDepth, setColorDepth } = usePreferences();
+  const { colorDepth, setColorDepth, theme, setTheme } = usePreferences();
   return (
     <section className="panel appearance-settings">
       <h2>Appearance</h2>
+      <div className="theme-options" role="group" aria-label="Color theme">
+        {(['light', 'dark', 'system'] as const).map((mode) => (
+          <button
+            key={mode}
+            className={theme === mode ? 'active' : ''}
+            aria-pressed={theme === mode}
+            onClick={() => setTheme(mode)}
+          >
+            {mode === 'light' ? '☀ Light' : mode === 'dark' ? '☾ Dark' : 'System'}
+          </button>
+        ))}
+      </div>
       <label htmlFor="color-depth">
         Color intensity <strong>{colorDepth}%</strong>
       </label>

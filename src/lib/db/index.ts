@@ -4,6 +4,7 @@ class OvgenDB extends Dexie {
   habits!: Table<Habit, string>;
   progress!: Table<Progress, string>;
   meta!: Table<{ key: string; value: boolean }, string>;
+  reminderDeliveries!: Table<{ key: string; date: string }, string>;
   constructor() {
     super('ovgen');
     this.version(1).stores({
@@ -11,6 +12,7 @@ class OvgenDB extends Dexie {
       progress: 'key,habitId,date,[habitId+date]',
       meta: 'key',
     });
+    this.version(2).stores({ reminderDeliveries: 'key,date' });
   }
 }
 export const db = new OvgenDB();
@@ -54,8 +56,12 @@ export const toggleStep = (h: Habit, d: string, id: string) =>
     steps: p.steps.includes(id) ? p.steps.filter((s) => s !== id) : [...p.steps, id],
   }));
 export async function deleteHabit(id: string) {
-  await db.transaction('rw', db.habits, db.progress, async () => {
+  await db.transaction('rw', db.habits, db.progress, db.reminderDeliveries, async () => {
     await db.progress.where('habitId').equals(id).delete();
+    const deliveries = await db.reminderDeliveries.toArray();
+    await db.reminderDeliveries.bulkDelete(
+      deliveries.filter((d) => d.key.startsWith(id + ':')).map((d) => d.key),
+    );
     await db.habits.delete(id);
   });
 }

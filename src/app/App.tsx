@@ -1,3 +1,5 @@
+import { HabitCalendar } from '../components/habits/habit-calendar';
+import { ReminderSettings, ReminderBanner, useReminders } from './reminders';
 import { habitTone } from '../lib/theme';
 import { useEffect, useState } from 'react';
 import {
@@ -270,7 +272,15 @@ function Dashboard() {
       </div>
       <Summary habits={habits} progress={progress} date={date} home />
       <div className="momentum panel">
-        <div className="ring" style={{ background: `conic-gradient(#6B58E8 ${total}%,#F0ECFF 0)` }}>
+        <div
+          className="ring"
+          style={
+            {
+              background: `conic-gradient(#6B58E8 ${total}%,#F0ECFF 0)`,
+              '--completion': `${total}%`,
+            } as React.CSSProperties
+          }
+        >
           <span>{total}%</span>
         </div>
         <div>
@@ -365,6 +375,7 @@ function Details() {
         </div>
         <Controls habit={h} progress={p} date={date} />
       </section>
+      <HabitCalendar habits={[h]} progress={history} detail />
       <section className="panel">
         <h2>Your rhythm</h2>
         <p className="muted">
@@ -497,6 +508,7 @@ function Insights() {
           ))}
         </div>
       </section>
+      <HabitCalendar habits={habits.filter((h) => !h.archived)} progress={progress} />
       <div className="panel encouragement">
         <Heart size={28} />
         <h2>Consistency grows with you.</h2>
@@ -559,6 +571,7 @@ function Profile() {
 }
 function Shell() {
   useColorDepth();
+  const reminders = useReminders();
   const { notice, notify } = useAppStore();
   const location = useLocation();
   useEffect(() => {
@@ -571,6 +584,7 @@ function Shell() {
   }, [location.pathname]);
   return (
     <div className="app-shell">
+      <ReminderBanner due={reminders.due} dismiss={reminders.dismiss} />
       <aside className="desktop-brand">
         <Link to="/">
           <Sprout size={28} />
@@ -610,6 +624,7 @@ function Shell() {
                   </div>
                 </header>
                 <AppearanceSettings />
+                <ReminderSettings />
               </>
             }
           />

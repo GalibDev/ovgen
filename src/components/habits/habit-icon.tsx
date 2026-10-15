@@ -33,7 +33,7 @@ export function HabitIcon({ name, color }: { name: string; color: string }) {
       className="habit-icon"
       style={{
         color: habitTone(color),
-        background: `color-mix(in srgb, ${color} var(--habit-tint, 18%), white)`,
+        background: `color-mix(in srgb, ${color} var(--habit-tint, 18%), var(--surface, white))`,
       }}
     >
       <Icon size={30} strokeWidth={1.8} />

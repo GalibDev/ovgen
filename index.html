@@ -8,6 +8,17 @@
       name="description"
       content="Ovgen — your personal growth space. Build better habits, one day at a time."
     />
+    <script>
+      try {
+        const preferences = JSON.parse(localStorage.getItem('ovgen-preferences') || '{}').state;
+        const theme = preferences?.theme || 'system';
+        const dark =
+          theme === 'dark' ||
+          (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      } catch {}
+    </script>
     <title>Ovgen · Your growth space</title>
   </head>
   <body>
