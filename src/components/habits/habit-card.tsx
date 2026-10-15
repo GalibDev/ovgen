@@ -1,3 +1,4 @@
+import { habitTone } from '../../lib/theme';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Minus, Plus, MoreVertical, Pencil, Trash2, ArrowUpRight } from 'lucide-react';
@@ -95,7 +96,16 @@ export function HabitCard({
   const amount =
     h.tracking === 'steps' ? h.steps.filter((s) => p?.steps.includes(s.id)).length : p?.value || 0;
   return (
-    <article className="habit-card" style={{ '--habit-color': h.color } as React.CSSProperties}>
+    <article
+      onMouseDown={(e) => {
+        if ((e.target as HTMLElement).closest('button,a,input')) e.stopPropagation();
+      }}
+      onTouchStart={(e) => {
+        if ((e.target as HTMLElement).closest('button,a,input')) e.stopPropagation();
+      }}
+      className="habit-card"
+      style={{ '--habit-color': habitTone(h.color) } as React.CSSProperties}
+    >
       <HabitIcon name={h.icon} color={h.color} />
       <div className="habit-main">
         <div className="card-top">
@@ -146,7 +156,7 @@ export function HabitCard({
             : `${amount} / ${h.tracking === 'steps' ? h.steps.length : h.target} ${h.unit}`}
         </p>
         <div className="progress-track">
-          <span style={{ width: `${n}%`, background: h.color }} />
+          <span style={{ width: `${n}%`, background: habitTone(h.color) }} />
         </div>
         <Controls habit={h} progress={p} date={date} />
       </div>

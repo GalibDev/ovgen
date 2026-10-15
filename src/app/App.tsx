@@ -1,3 +1,4 @@
+import { habitTone } from '../lib/theme';
 import { useEffect, useState } from 'react';
 import {
   BrowserRouter,
@@ -30,15 +31,24 @@ import {
 } from 'lucide-react';
 import { db, seed, localDate, dayDate, scheduled, percent, deleteHabit } from '../lib/db';
 import { useAppStore } from '../stores/app';
-import { HabitCard, Controls } from '../components/habits/habit-card';
+import { Controls } from '../components/habits/habit-card';
 import { HabitIcon } from '../components/habits/habit-icon';
 import { Button } from '../components/ui/button';
 import { HabitBuilder } from '../features/habits/builder';
 import type { Habit, Progress } from '../types';
+import { usePreferences } from '../stores/preferences';
+import { AppearanceSettings, useColorDepth } from './appearance';
+import { SortableHabitList } from '../components/habits/sortable-habit-list';
 function useData() {
   const habits = useLiveQuery(() => db.habits.toArray(), []) || [];
   const progress = useLiveQuery(() => db.progress.toArray(), []) || [];
-  return { habits, progress };
+  const order = usePreferences((s) => s.habitOrder);
+  const rank = new Map(order.map((id, index) => [id, index]));
+  const sorted = [...habits].sort(
+    (a, b) =>
+      (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+  );
+  return { habits: sorted, progress };
 }
 const displayDate = (date: string) =>
   dayDate(date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
@@ -176,16 +186,7 @@ function Habits() {
         />
         <span>{filtered.length} habits</span>
       </label>
-      <div className="habit-list">
-        {filtered.map((h) => (
-          <HabitCard
-            key={h.id}
-            habit={h}
-            progress={progress.find((p) => p.habitId === h.id && p.date === date)}
-            date={date}
-          />
-        ))}
-      </div>
+      <SortableHabitList habits={filtered} progress={progress} date={date} />
       {!habits.length ? (
         <Empty />
       ) : (
@@ -284,16 +285,7 @@ function Dashboard() {
         </Link>
       </div>
       <DateSelector />
-      <div className="habit-list">
-        {active.map((h) => (
-          <HabitCard
-            key={h.id}
-            habit={h}
-            progress={progress.find((p) => p.habitId === h.id && p.date === date)}
-            date={date}
-          />
-        ))}
-      </div>
+      <SortableHabitList habits={active} progress={progress} date={date} />
       {!active.length &&
         (habits.length ? (
           <div className="empty panel">
@@ -362,13 +354,13 @@ function Details() {
           <DateSelector />
         </div>
         {!scheduled(h, date) && <p className="muted">This habit is not scheduled for this day.</p>}
-        <strong className="big-percent" style={{ color: h.color }}>
+        <strong className="big-percent" style={{ color: habitTone(h.color) }}>
           {n}
           <span>%</span>
         </strong>
         <p>{n === 100 ? 'You showed up. That’s a win.' : 'A little progress is still progress.'}</p>
         <div className="progress-track">
-          <span style={{ width: `${n}%`, background: h.color }} />
+          <span style={{ width: `${n}%`, background: habitTone(h.color) }} />
         </div>
         <Controls habit={h} progress={p} date={date} />
       </section>
@@ -523,6 +515,10 @@ function Profile() {
           <p>A little space, just for you.</p>
         </div>
       </header>
+      <Link className="profile-link panel" to="/settings">
+        <span>Settings · Appearance</span>
+        <ChevronRight size={19} />
+      </Link>
       <section className="panel profile-card">
         <div className="avatar large">
           <UserRound size={35} />
@@ -555,6 +551,7 @@ function Profile() {
   );
 }
 function Shell() {
+  useColorDepth();
   const { notice, notify } = useAppStore();
   const location = useLocation();
   useEffect(() => {
@@ -590,6 +587,25 @@ function Shell() {
           <Route path="/habits/:id/edit" element={<HabitBuilder />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/settings"
+            element={
+              <>
+                <Link className="back" to="/profile">
+                  <ArrowLeft size={18} />
+                  Profile
+                </Link>
+                <header className="page-header">
+                  <div>
+                    <div className="eyebrow">MAKE IT YOURS</div>
+                    <h1>Settings</h1>
+                    <p>Your space, your preferences.</p>
+                  </div>
+                </header>
+                <AppearanceSettings />
+              </>
+            }
+          />
           <Route
             path="*"
             element={
