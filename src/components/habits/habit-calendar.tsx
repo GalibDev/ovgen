@@ -1,3 +1,4 @@
+import { t, locale } from '../../lib/i18n';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Flame, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -35,29 +36,29 @@ export function HabitCalendar({
         <section className="panel">
           <Flame />
           <strong>{current}</strong>
-          <p>Current streak</p>
+          <p>{t('Current streak')}</p>
         </section>
         <section className="panel">
           <Trophy />
           <strong>{best}</strong>
-          <p>Best streak</p>
+          <p>{t('Best streak')}</p>
         </section>
       </div>
       <section className="panel calendar-panel">
         <div className="section-title">
-          <h2>Consistency calendar</h2>
+          <h2>{t('Consistency calendar')}</h2>
         </div>
         <div className="month-nav">
           <button
-            aria-label="Previous month"
+            aria-label={t('Previous month')}
             disabled={month <= start.slice(0, 7)}
             onClick={() => changeMonth(-1)}
           >
             <ChevronLeft size={19} />
           </button>
-          <strong>{first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</strong>
+          <strong>{first.toLocaleDateString(locale(), { month: 'long', year: 'numeric' })}</strong>
           <button
-            aria-label="Next month"
+            aria-label={t('Next month')}
             disabled={month >= today.slice(0, 7)}
             onClick={() => changeMonth(1)}
           >
@@ -65,7 +66,10 @@ export function HabitCalendar({
           </button>
         </div>
         <div className="calendar-grid">
-          {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+          {(locale() === 'bn-BD'
+            ? ['সো', 'ম', 'বু', 'বৃ', 'শু', 'শ', 'র']
+            : ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+          ).map((day, i) => (
             <span className="weekday-label" key={i}>
               {day}
             </span>
@@ -92,7 +96,11 @@ export function HabitCalendar({
                 key={date}
                 disabled={unavailable}
                 className={`heat-day level-${level} ${date === selected ? 'selected' : ''} ${date === today ? 'is-today' : ''}`}
-                aria-label={`${date}: ${score.complete} of ${score.scheduled} habits complete`}
+                aria-label={t('{date}: {done} of {total} habits complete', {
+                  date,
+                  done: score.complete,
+                  total: score.scheduled,
+                })}
                 aria-pressed={selected === date}
                 title={`${date}: ${score.complete}/${score.scheduled}`}
                 onClick={() => {
@@ -106,32 +114,34 @@ export function HabitCalendar({
           })}
         </div>
         <div className="heat-legend">
-          <span>Not scheduled</span>
+          <span>{t('Not scheduled')}</span>
           {[0, 1, 2, 3, 4].map((level) => (
             <i key={level} className={'level-' + level} />
           ))}
-          <span>Complete</span>
+          <span>{t('Complete')}</span>
         </div>
         <div className="calendar-selection">
           <strong>
-            {dayDate(selected).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            {dayDate(selected).toLocaleDateString(locale(), { month: 'short', day: 'numeric' })}
           </strong>
           <span>
             {selected < start
-              ? 'No habits yet'
+              ? t('No habits yet')
               : score.scheduled
-                ? `${score.complete} / ${score.scheduled} completed`
-                : 'Rest day'}
+                ? t('{done} / {total} completed', { done: score.complete, total: score.scheduled })
+                : t('Rest day')}
           </span>
           {!detail && score.scheduled > 0 && (
             <Link to="/habits" onClick={() => setDate(selected)}>
-              View day <ChevronRight size={14} />
+              {t('View day')}
+              <ChevronRight size={14} />
             </Link>
           )}
         </div>
         <p className="muted calendar-note">
-          Streaks count completed scheduled days. Rest days do not break a streak; today stays open
-          until midnight. Based on your current schedule and targets.
+          {t(
+            'Streaks count completed scheduled days. Rest days do not break a streak; today stays open until midnight. Based on your current schedule and targets.',
+          )}
         </p>
       </section>
     </>

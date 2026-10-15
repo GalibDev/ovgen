@@ -1,4 +1,4 @@
-import { dayDate, localDate, percent } from './db';
+import { dayDate, localDate, percent, scheduled } from './db';
 import type { Habit, Progress } from '../types';
 export const isComplete = (h: Habit, p?: Progress) =>
   h.tracking === 'boolean'
@@ -12,9 +12,7 @@ export const shiftDate = (date: string, days: number) => {
   return localDate(d);
 };
 export function dailyScore(habits: Habit[], records: Map<string, Progress>, date: string) {
-  const active = habits.filter(
-    (h) => h.createdAt.slice(0, 10) <= date && h.weekdays.includes(dayDate(date).getDay()),
-  );
+  const active = habits.filter((h) => scheduled(h, date));
   const complete = active.filter((h) => isComplete(h, records.get(`${h.id}:${date}`))).length;
   return {
     scheduled: active.length,

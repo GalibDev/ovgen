@@ -1,3 +1,7 @@
+import { t, locale, useLanguage, LanguageSettings } from '../lib/i18n';
+import { Templates } from '../features/habits/templates-page';
+import { FocusTimer, FocusBar, useFocusCompletion } from '../features/habits/focus-timer';
+import { setHabitStatus } from '../features/habits/status';
 import { AppUpdate } from './app-update';
 import { HabitCalendar } from '../components/habits/habit-calendar';
 import { ReminderSettings, ReminderBanner, useReminders } from './reminders';
@@ -55,14 +59,14 @@ function useData() {
   return { habits: sorted, progress };
 }
 const displayDate = (date: string) =>
-  dayDate(date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+  dayDate(date).toLocaleDateString(locale(), { month: 'long', day: 'numeric', year: 'numeric' });
 function DateSelector() {
   const { date, setDate } = useAppStore();
   return (
     <label className="date-select">
       <CalendarDays size={17} />
       <input
-        aria-label="Select progress date"
+        aria-label={t('Select progress date')}
         type="date"
         max={localDate()}
         value={date}
@@ -98,17 +102,17 @@ function Summary({
   return (
     <section className="summary">
       <div className="summary-content">
-        <span className="eyebrow">{home ? 'KEEP YOUR MOMENTUM' : 'SMALL STEPS, EVERY DAY'}</span>
+        <span className="eyebrow">
+          {home ? t('KEEP YOUR MOMENTUM') : t('SMALL STEPS, EVERY DAY')}
+        </span>
         <h2>
           {home
-            ? 'A little better, every day.'
+            ? t('A little better, every day.')
             : date === localDate()
-              ? 'Today’s consistency'
-              : 'Your daily consistency'}
+              ? t('Today’s consistency')
+              : t('Your daily consistency')}
         </h2>
-        <p>
-          {completed} of {active.length} habits completed
-        </p>
+        <p>{t('{done} of {total} habits completed', { done: completed, total: active.length })}</p>
         <div className="summary-progress">
           <div className="progress-track">
             <span style={{ width: `${total}%` }} />
@@ -130,12 +134,12 @@ function Empty() {
   return (
     <div className="empty panel">
       <Sprout size={42} />
-      <h2>A fresh start awaits</h2>
-      <p>Plant a small habit. Give yourself room to grow.</p>
+      <h2>{t('A fresh start awaits')}</h2>
+      <p>{t('Plant a small habit. Give yourself room to grow.')}</p>
       <Button asChild>
         <Link to="/habits/new">
           <Plus size={18} />
-          Create a habit
+          {t('Create a habit')}
         </Link>
       </Button>
     </div>
@@ -145,13 +149,18 @@ function Habits() {
   const { habits, progress } = useData();
   const { date } = useAppStore();
   const [category, setCategory] = useState('All');
+  const [status, setStatus] = useState<'active' | 'paused' | 'archived'>('active');
   const [search, setSearch] = useState('');
   const categories = Array.from(
     new Set(['All', 'Faith', 'Health', 'Learning', 'Personal', ...habits.map((h) => h.category)]),
   );
   const filtered = habits.filter(
     (h) =>
-      !h.archived &&
+      (status === 'archived'
+        ? h.archived
+        : status === 'paused'
+          ? !h.archived && h.paused
+          : !h.archived && !h.paused) &&
       (category === 'All' || h.category === category) &&
       h.name.toLowerCase().includes(search.toLowerCase()),
   );
@@ -159,36 +168,56 @@ function Habits() {
     <>
       <header className="page-header">
         <div>
-          <div className="eyebrow">YOUR GROWTH SPACE</div>
-          <h1>My habits</h1>
-          <p>Tiny actions. Big changes.</p>
+          <div className="eyebrow">{t('YOUR GROWTH SPACE')}</div>
+          <h1>{t('My habits')}</h1>
+          <p>{t('Tiny actions. Big changes.')}</p>
         </div>
-        <Link to="/habits/new" className="add-button" aria-label="Add habit">
+        <Link to="/habits/new" className="add-button" aria-label={t('Add habit')}>
           <Plus size={29} />
         </Link>
       </header>
       <Summary habits={habits} progress={progress} date={date} />
+      <div className="habit-toolbar">
+        <div className="status-tabs">
+          {(['active', 'paused', 'archived'] as const).map((value) => (
+            <button
+              key={value}
+              className={status === value ? 'active' : ''}
+              aria-pressed={status === value}
+              onClick={() => setStatus(value)}
+            >
+              {t(
+                value === 'active' ? t('Active') : value === 'paused' ? t('Paused') : t('Archived'),
+              )}
+            </button>
+          ))}
+        </div>
+        <Link to="/habits/templates">
+          {t('Habit templates')} <Plus size={15} />
+        </Link>
+      </div>
       <div className="section-title">
         <h2>
-          All habits <span className="count">{habits.filter((h) => !h.archived).length}</span>
+          {t(status === 'archived' ? 'Archived' : status === 'paused' ? 'Paused' : 'All habits')}
+          <span className="count">{filtered.length}</span>
         </h2>
         <DateSelector />
       </div>
       <div className="filters">
         {categories.map((c) => (
           <button className={category === c ? 'active' : ''} key={c} onClick={() => setCategory(c)}>
-            {c}
+            {t(c)}
           </button>
         ))}
       </div>
       <label className="search">
         <Search size={18} />
         <input
-          placeholder="Find a habit…"
+          placeholder={t('Find a habit…')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <span>{filtered.length} habits</span>
+        <span>{t('{count} habits', { count: filtered.length })}</span>
       </label>
       <SortableHabitList habits={filtered} progress={progress} date={date} />
       {!habits.length ? (
@@ -197,14 +226,14 @@ function Habits() {
         !filtered.length && (
           <div className="empty">
             <Search size={28} />
-            <h2>No habits found</h2>
-            <p>Try another name or category.</p>
+            <h2>{t('No habits found')}</h2>
+            <p>{t('Try another name or category.')}</p>
           </div>
         )
       )}
       <p className="closing">
         <Sprout size={15} />
-        Progress is a practice, not a destination.
+        {t('Progress is a practice, not a destination.')}
       </p>
     </>
   );
@@ -214,7 +243,11 @@ function Dashboard() {
   const { date, setDate } = useAppStore();
   const now = new Date();
   const greeting =
-    now.getHours() < 12 ? 'Good morning' : now.getHours() < 18 ? 'Good afternoon' : 'Good evening';
+    now.getHours() < 12
+      ? t('Good morning')
+      : now.getHours() < 18
+        ? t('Good afternoon')
+        : t('Good evening');
   const first = dayDate(date);
   first.setDate(first.getDate() - ((first.getDay() + 6) % 7));
   const week = Array.from({ length: 7 }, (_, i) => {
@@ -241,19 +274,19 @@ function Dashboard() {
       <header className="page-header">
         <div>
           <div className="eyebrow">
-            {new Date().toLocaleDateString(undefined, {
+            {new Date().toLocaleDateString(locale(), {
               weekday: 'long',
               month: 'long',
               day: 'numeric',
             })}
           </div>
           <h1>
-            {greeting}
+            {t(greeting)}
             <span className="greeting-dot">.</span>
           </h1>
-          <p>Let’s make today a little meaningful.</p>
+          <p>{t('Let’s make today a little meaningful.')}</p>
         </div>
-        <Link className="avatar" to="/profile" aria-label="Your profile">
+        <Link className="avatar" to="/profile" aria-label={t('Your profile')}>
           <UserRound size={24} />
         </Link>
       </header>
@@ -265,7 +298,7 @@ function Dashboard() {
             className={date === localDate(d) ? 'active' : ''}
             onClick={() => setDate(localDate(d))}
           >
-            <span>{d.toLocaleDateString(undefined, { weekday: 'short' })}</span>
+            <span>{d.toLocaleDateString(locale(), { weekday: 'short' })}</span>
             <strong>{d.getDate()}</strong>
             <i className={localDate(d) === localDate() ? 'today' : ''} />
           </button>
@@ -285,15 +318,16 @@ function Dashboard() {
           <span>{total}%</span>
         </div>
         <div>
-          <h3>Your daily momentum</h3>
-          <p>Every small action moves you forward.</p>
+          <h3>{t('Your daily momentum')}</h3>
+          <p>{t('Every small action moves you forward.')}</p>
         </div>
         <Check size={22} />
       </div>
       <div className="section-title">
-        <h2>{date === localDate() ? 'Today’s habits' : 'Your habits'}</h2>
+        <h2>{date === localDate() ? t('Today’s habits') : t('Your habits')}</h2>
         <Link to="/habits">
-          View all <ArrowRight size={17} />
+          {t('View all')}
+          <ArrowRight size={17} />
         </Link>
       </div>
       <DateSelector />
@@ -302,9 +336,9 @@ function Dashboard() {
         (habits.length ? (
           <div className="empty panel">
             <CalendarDays />
-            <h2>A little breathing room</h2>
-            <p>No habits scheduled for this day.</p>
-            <Link to="/habits">Manage your habits</Link>
+            <h2>{t('A little breathing room')}</h2>
+            <p>{t('No habits scheduled for this day.')}</p>
+            <Link to="/habits">{t('Manage your habits')}</Link>
           </div>
         ) : (
           <Empty />
@@ -333,8 +367,8 @@ function Details() {
   if (!h)
     return (
       <div className="empty">
-        {loaded ? 'Habit not found.' : 'Loading…'}
-        <Link to="/habits">Back to habits</Link>
+        {loaded ? t('Habit not found.') : t('Loading…')}
+        <Link to="/habits">{t('Back to habits')}</Link>
       </div>
     );
   const p = history.find((p) => p.date === date);
@@ -348,15 +382,24 @@ function Details() {
     <>
       <Link className="back" to="/habits">
         <ArrowLeft size={18} />
-        My habits
+        {t('My habits')}
       </Link>
       <header className="page-header">
         <div>
           <div className="eyebrow">
-            {h.category} · {h.tracking}
+            {t(h.category)} ·{' '}
+            {t(
+              h.tracking === 'boolean'
+                ? 'Check off'
+                : h.tracking === 'duration'
+                  ? 'Duration'
+                  : h.tracking === 'steps'
+                    ? 'Steps'
+                    : 'Count',
+            )}
           </div>
           <h1>{h.name}</h1>
-          <p>{h.description || 'One small promise to yourself.'}</p>
+          <p>{h.description || t('One small promise to yourself.')}</p>
         </div>
         <HabitIcon name={h.icon} color={h.color} />
       </header>
@@ -365,41 +408,69 @@ function Details() {
           <h2>{displayDate(date)}</h2>
           <DateSelector />
         </div>
-        {!scheduled(h, date) && <p className="muted">This habit is not scheduled for this day.</p>}
+        {!scheduled(h, date) && (
+          <p className="muted">{t('This habit is not scheduled for this day.')}</p>
+        )}
         <strong className="big-percent" style={{ color: habitTone(h.color) }}>
           {n}
           <span>%</span>
         </strong>
-        <p>{n === 100 ? 'You showed up. That’s a win.' : 'A little progress is still progress.'}</p>
+        <p>
+          {n === 100
+            ? t('You showed up. That’s a win.')
+            : t('A little progress is still progress.')}
+        </p>
         <div className="progress-track">
           <span style={{ width: `${n}%`, background: habitTone(h.color) }} />
         </div>
-        <Controls habit={h} progress={p} date={date} />
+        <fieldset
+          className="tracking-controls"
+          disabled={!!(h.paused || h.archived) && date >= localDate()}
+        >
+          <Controls habit={h} progress={p} date={date} />
+        </fieldset>
       </section>
+      {h.tracking === 'duration' && <FocusTimer habit={h} />}
+      {(h.paused || h.archived) && (
+        <section className="panel inactive-notice">
+          <strong>{t(h.archived ? t('Archived') : t('Paused'))}</strong>
+          <p>{t('History is preserved. Resume whenever you’re ready.')}</p>
+          <Button
+            onClick={() =>
+              void setHabitStatus(h.id, 'active')
+                .then(() => notify(t('Habit resumed')))
+                .catch(() => notify(t('Could not update habit')))
+            }
+          >
+            {t(h.archived ? t('Restore habit') : t('Resume habit'))}
+          </Button>
+        </section>
+      )}
       <HabitCalendar habits={[h]} progress={history} detail />
       <section className="panel">
-        <h2>Your rhythm</h2>
+        <h2>{t('Your rhythm')}</h2>
         <p className="muted">
           {h.weekdays.length === 7
-            ? 'Every day'
+            ? t('Every day')
             : h.weekdays
-                .map(
-                  (d) =>
+                .map((d) =>
+                  t(
                     ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][
                       d
                     ],
+                  ),
                 )
                 .join(', ')}
         </p>
         <div className="section-title">
-          <h2>Recent history</h2>
-          <span className="muted">Last 7 days</span>
+          <h2>{t('Recent history')}</h2>
+          <span className="muted">{t('Last 7 days')}</span>
         </div>
         {dates.map((d) => (
           <button className="history-row" key={d} onClick={() => setDate(d)}>
             <span>
               {displayDate(d)}
-              <small>{scheduled(h, d) ? 'Scheduled' : 'Not scheduled'}</small>
+              <small>{scheduled(h, d) ? t('Scheduled') : t('Not scheduled')}</small>
             </span>
             <strong>
               {percent(
@@ -413,26 +484,64 @@ function Details() {
         ))}
       </section>
       <div className="detail-actions">
+        {!h.archived && (
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (
+                !h.paused &&
+                !confirm(
+                  t(
+                    'Pause or archive this habit? Any active focus timer for it will be cancelled.',
+                  ),
+                )
+              )
+                return;
+              void setHabitStatus(h.id, h.paused ? 'active' : 'paused')
+                .then(() => notify(t(h.paused ? t('Habit resumed') : t('Habit paused'))))
+                .catch(() => notify(t('Could not update habit')));
+            }}
+          >
+            {t(h.paused ? t('Resume habit') : t('Pause habit'))}
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          onClick={() => {
+            if (
+              !h.archived &&
+              !confirm(
+                t('Pause or archive this habit? Any active focus timer for it will be cancelled.'),
+              )
+            )
+              return;
+            void setHabitStatus(h.id, h.archived ? 'active' : 'archived')
+              .then(() => notify(t(h.archived ? t('Habit resumed') : t('Habit archived'))))
+              .catch(() => notify(t('Could not update habit')));
+          }}
+        >
+          {t(h.archived ? t('Restore habit') : t('Archive habit'))}
+        </Button>
         <Button asChild>
           <Link to={`/habits/${id}/edit`}>
             <Pencil size={17} />
-            Edit habit
+            {t('Edit habit')}
           </Link>
         </Button>
         <Button
           variant="outline"
           onClick={() => {
-            if (confirm(`Delete ${h.name} and all its history?`))
+            if (confirm(t('Delete {name} and all its history?', { name: h.name })))
               void deleteHabit(h.id)
                 .then(() => {
-                  notify('Habit deleted');
+                  notify(t('Habit deleted'));
                   navigate('/habits');
                 })
-                .catch(() => notify('Could not delete habit'));
+                .catch(() => notify(t('Could not delete habit')));
           }}
         >
           <Trash2 size={17} />
-          Delete habit
+          {t('Delete habit')}
         </Button>
       </div>
     </>
@@ -467,17 +576,17 @@ function Insights() {
     <>
       <header className="page-header">
         <div>
-          <div className="eyebrow">LOOK HOW FAR YOU’VE COME</div>
-          <h1>Your insights</h1>
-          <p>Small efforts. A bigger picture.</p>
+          <div className="eyebrow">{t('LOOK HOW FAR YOU’VE COME')}</div>
+          <h1>{t('Your insights')}</h1>
+          <p>{t('Small efforts. A bigger picture.')}</p>
         </div>
         <ChartPie className="header-icon" size={32} />
       </header>
       <div className="stats-grid">
         <div className="panel">
           <Sprout />
-          <strong>{habits.filter((h) => !h.archived).length}</strong>
-          <p>Growing habits</p>
+          <strong>{habits.filter((h) => !h.archived && !h.paused).length}</strong>
+          <p>{t('Growing habits')}</p>
         </div>
         <div className="panel">
           <Check />
@@ -489,13 +598,13 @@ function Insights() {
               }).length
             }
           </strong>
-          <p>Daily wins recorded</p>
+          <p>{t('Daily wins recorded')}</p>
         </div>
       </div>
       <section className="panel">
         <div className="section-title">
-          <h2>This week’s rhythm</h2>
-          <span className="muted">Daily completion</span>
+          <h2>{t('This week’s rhythm')}</h2>
+          <span className="muted">{t('Daily completion')}</span>
         </div>
         <div className="chart">
           {week.map((d) => (
@@ -504,16 +613,16 @@ function Insights() {
               <div className="bar-space">
                 <div style={{ height: `${Math.max(d.value, 2)}%` }} />
               </div>
-              <small>{dayDate(d.date).toLocaleDateString(undefined, { weekday: 'short' })}</small>
+              <small>{dayDate(d.date).toLocaleDateString(locale(), { weekday: 'short' })}</small>
             </div>
           ))}
         </div>
       </section>
-      <HabitCalendar habits={habits.filter((h) => !h.archived)} progress={progress} />
+      <HabitCalendar habits={habits} progress={progress} />
       <div className="panel encouragement">
         <Heart size={28} />
-        <h2>Consistency grows with you.</h2>
-        <p>Keep showing up. Your daily actions tell your story.</p>
+        <h2>{t('Consistency grows with you.')}</h2>
+        <p>{t('Keep showing up. Your daily actions tell your story.')}</p>
       </div>
     </>
   );
@@ -524,18 +633,18 @@ function Profile() {
     <>
       <header className="page-header">
         <div>
-          <div className="eyebrow">YOUR PERSONAL CORNER</div>
-          <h1>My profile</h1>
-          <p>A little space, just for you.</p>
+          <div className="eyebrow">{t('YOUR PERSONAL CORNER')}</div>
+          <h1>{t('My profile')}</h1>
+          <p>{t('A little space, just for you.')}</p>
         </div>
-        <Link to="/settings" className="add-button" aria-label="Settings">
+        <Link to="/settings" className="add-button" aria-label={t('Settings')}>
           <Settings size={25} />
         </Link>
       </header>
       <Link className="profile-link panel" to="/settings">
         <span className="settings-link-label">
           <Settings size={21} />
-          Settings · Appearance
+          {t('Settings · Appearance')}
         </span>
         <ChevronRight size={19} />
       </Link>
@@ -543,28 +652,28 @@ function Profile() {
         <div className="avatar large">
           <UserRound size={35} />
         </div>
-        <h2>Your growth journey</h2>
-        <p>{habits.length} habits. Endless possibilities.</p>
-        <span className="badge">Personal growth explorer</span>
+        <h2>{t('Your growth journey')}</h2>
+        <p>{t('{count} habits. Endless possibilities.', { count: habits.length })}</p>
+        <span className="badge">{t('Personal growth explorer')}</span>
       </section>
       <section className="panel">
         <div className="info-row">
           <ShieldCheck />
           <div>
-            <h3>Yours, on this device</h3>
-            <p>Habits and history are saved locally in your browser.</p>
+            <h3>{t('Yours, on this device')}</h3>
+            <p>{t('Habits and history are saved locally in your browser.')}</p>
           </div>
         </div>
         <div className="info-row">
           <Sprout />
           <div>
-            <h3>Made for small beginnings</h3>
+            <h3>{t('Made for small beginnings')}</h3>
             <p>Ovgen · Version 0.1 · Phase 1</p>
           </div>
         </div>
       </section>
       <Link className="profile-link panel" to="/habits">
-        <span>Keep building your habits</span>
+        <span>{t('Keep building your habits')}</span>
         <ArrowRight size={19} />
       </Link>
     </>
@@ -572,6 +681,7 @@ function Profile() {
 }
 function Shell() {
   useColorDepth();
+  const focusSession = useFocusCompletion();
   const reminders = useReminders();
   const { notice, notify } = useAppStore();
   const location = useLocation();
@@ -584,8 +694,9 @@ function Shell() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
   return (
-    <div className="app-shell">
+    <div className={focusSession ? 'app-shell has-focus' : 'app-shell'}>
       <AppUpdate />
+      <FocusBar />
       <ReminderBanner due={reminders.due} dismiss={reminders.dismiss} />
       <aside className="desktop-brand">
         <Link to="/">
@@ -594,11 +705,11 @@ function Shell() {
             ovgen<span className="brand-dot">.</span>
           </span>
         </Link>
-        <p>Your growth space</p>
+        <p>{t('Your growth space')}</p>
         <div className="sidebar-note">
           <Sprout size={30} />
-          <strong>A little, every day.</strong>
-          <p>Become who you want to be, one habit at a time.</p>
+          <strong>{t('A little, every day.')}</strong>
+          <p>{t('Become who you want to be, one habit at a time.')}</p>
         </div>
       </aside>
       <main key={location.pathname}>
@@ -606,6 +717,7 @@ function Shell() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/habits" element={<Habits />} />
           <Route path="/habits/new" element={<HabitBuilder />} />
+          <Route path="/habits/templates" element={<Templates />} />
           <Route path="/habits/:id" element={<Details />} />
           <Route path="/habits/:id/edit" element={<HabitBuilder />} />
           <Route path="/insights" element={<Insights />} />
@@ -616,15 +728,16 @@ function Shell() {
               <>
                 <Link className="back" to="/profile">
                   <ArrowLeft size={18} />
-                  Profile
+                  {t('Profile')}
                 </Link>
                 <header className="page-header">
                   <div>
-                    <div className="eyebrow">MAKE IT YOURS</div>
-                    <h1>Settings</h1>
-                    <p>Your space, your preferences.</p>
+                    <div className="eyebrow">{t('MAKE IT YOURS')}</div>
+                    <h1>{t('Settings')}</h1>
+                    <p>{t('Your space, your preferences.')}</p>
                   </div>
                 </header>
+                <LanguageSettings />
                 <AppearanceSettings />
                 <ReminderSettings />
               </>
@@ -634,8 +747,8 @@ function Shell() {
             path="*"
             element={
               <div className="empty">
-                <h1>A little off track?</h1>
-                <Link to="/">Go home</Link>
+                <h1>{t('A little off track?')}</h1>
+                <Link to="/">{t('Go home')}</Link>
               </div>
             }
           />
@@ -660,7 +773,7 @@ function Shell() {
             <span>
               <Icon size={25} strokeWidth={1.8} />
             </span>
-            <small>{label}</small>
+            <small>{t(label)}</small>
           </NavLink>
         ))}
       </nav>
@@ -668,7 +781,7 @@ function Shell() {
         <div role="status" className="toast">
           <Check size={17} />
           {notice}
-          <button aria-label="Dismiss notification" onClick={() => notify('')}>
+          <button aria-label={t('Dismiss notification')} onClick={() => notify('')}>
             ×
           </button>
         </div>
@@ -677,6 +790,7 @@ function Shell() {
   );
 }
 export default function App() {
+  useLanguage();
   const [ready, setReady] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -684,7 +798,9 @@ export default function App() {
     const timer = setTimeout(() => {
       if (active)
         setError(
-          'Opening your saved habits is taking longer than expected. Close other Ovgen tabs, then retry. Your data has not been deleted.',
+          t(
+            'Opening your saved habits is taking longer than expected. Close other Ovgen tabs, then retry. Your data has not been deleted.',
+          ),
         );
     }, 12000);
     seed()
@@ -699,7 +815,9 @@ export default function App() {
         if (active) {
           clearTimeout(timer);
           setError(
-            'Your browser could not open local storage. Please allow site storage and try again. Your saved data has not been reset.',
+            t(
+              'Your browser could not open local storage. Please allow site storage and try again. Your saved data has not been reset.',
+            ),
           );
         }
       });
@@ -711,16 +829,16 @@ export default function App() {
   if (error)
     return (
       <div className="empty">
-        <h2>Let’s reopen your growth space</h2>
+        <h2>{t('Let’s reopen your growth space')}</h2>
         <p>{error}</p>
-        <Button onClick={() => location.reload()}>Try again</Button>
+        <Button onClick={() => location.reload()}>{t('Try again')}</Button>
       </div>
     );
   if (!ready)
     return (
       <div className="loading">
         <Sprout size={40} />
-        <p>Making room for growth…</p>
+        <p>{t('Making room for growth…')}</p>
       </div>
     );
   return (

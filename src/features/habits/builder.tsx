@@ -1,3 +1,5 @@
+import { bn } from '../../lib/translations';
+import { t } from '../../lib/i18n';
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -11,11 +13,12 @@ const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export function HabitBuilder() {
   const { id } = useParams();
   const habit = useLiveQuery(async () => (id ? await db.habits.get(id) : null), [id]);
-  if (id && habit === undefined) return <p className="empty">Loading habit…</p>;
+  if (id && habit === undefined) return <p className="empty">{t('Loading habit…')}</p>;
   if (id && !habit)
     return (
       <div className="empty">
-        Habit not found. <Link to="/habits">Back to habits</Link>
+        {t('Habit not found.')}
+        <Link to="/habits">{t('Back to habits')}</Link>
       </div>
     );
   return <Builder key={id || 'new'} original={habit || undefined} />;
@@ -46,14 +49,14 @@ function Builder({ original }: { original?: Habit }) {
   async function save(e: FormEvent) {
     e.preventDefault();
     if (!h.name.trim() || !h.category.trim())
-      return setError('Please give your habit a name and category.');
-    if (!h.weekdays.length) return setError('Choose at least one day.');
+      return setError(t('Please give your habit a name and category.'));
+    if (!h.weekdays.length) return setError(t('Choose at least one day.'));
     if (h.tracking === 'steps' && (!h.steps.length || h.steps.some((s) => !s.name.trim())))
-      return setError('Add at least one step and name every step.');
+      return setError(t('Add at least one step and name every step.'));
     if (['count', 'duration'].includes(h.tracking) && (!Number.isFinite(h.target) || h.target <= 0))
-      return setError('Target must be greater than zero.');
+      return setError(t('Target must be greater than zero.'));
     if (h.reminder?.enabled && !/^([01]\d|2[0-3]):[0-5]\d$/.test(h.reminder.time))
-      return setError('Choose a valid reminder time.');
+      return setError(t('Choose a valid reminder time.'));
     setSaving(true);
     try {
       await db.habits.put({
@@ -63,10 +66,10 @@ function Builder({ original }: { original?: Habit }) {
         unit: h.tracking === 'duration' ? 'minutes' : h.unit,
         steps: h.steps.map((s) => ({ ...s, name: s.name.trim() })),
       });
-      notify(original ? 'Habit updated' : 'Your new habit is ready');
+      notify(original ? t('Habit updated') : t('Your new habit is ready'));
       navigate(`/habits/${h.id}`, { replace: true });
     } catch {
-      setError('Could not save. Please try again.');
+      setError(t('Could not save. Please try again.'));
       setSaving(false);
     }
   }
@@ -74,38 +77,45 @@ function Builder({ original }: { original?: Habit }) {
     <>
       <Link className="back" to={original ? `/habits/${h.id}` : '/habits'}>
         <ArrowLeft size={18} />
-        Back
+        {t('Back')}
       </Link>
       <header className="page-header">
         <div>
-          <div className="eyebrow">ONE SMALL STEP</div>
-          <h1>{original ? 'Edit habit' : 'Create a habit'}</h1>
-          <p>Make room for the person you want to become.</p>
+          <div className="eyebrow">{t('ONE SMALL STEP')}</div>
+          <h1>{original ? t('Edit habit') : t('Create a habit')}</h1>
+          <p>{t('Make room for the person you want to become.')}</p>
         </div>
         <HabitIcon name={h.icon} color={h.color} />
       </header>
+      {!original && (
+        <Link to="/habits/templates" className="profile-link panel">
+          {t('Start from a template')}
+          <Plus size={18} />
+        </Link>
+      )}
       <form onSubmit={save} className="builder">
         <section className="panel">
-          <h2>The little details</h2>
+          <h2>{t('The little details')}</h2>
           <label>
-            Habit name
+            {t('Habit name')}
             <input
               maxLength={100}
-              placeholder="e.g. Read a little every day"
+              placeholder={t('e.g. Read a little every day')}
               value={h.name}
               onChange={(e) => patch({ name: e.target.value })}
             />
           </label>
           <label>
-            Description <span className="muted">(optional)</span>
+            {t('Description')}
+            <span className="muted">{t('(optional)')}</span>
             <textarea
-              placeholder="Your reason for showing up…"
+              placeholder={t('Your reason for showing up…')}
               value={h.description}
               onChange={(e) => patch({ description: e.target.value })}
             />
           </label>
           <label>
-            Category
+            {t('Category')}
             <input
               list="categories"
               value={h.category}
@@ -113,11 +123,13 @@ function Builder({ original }: { original?: Habit }) {
             />
             <datalist id="categories">
               {['Faith', 'Health', 'Learning', 'Personal'].map((c) => (
-                <option key={c}>{c}</option>
+                <option key={c} value={c}>
+                  {t(c)}
+                </option>
               ))}
             </datalist>
           </label>
-          <label>Choose an icon</label>
+          <label>{t('Choose an icon')}</label>
           <div className="picker">
             {Object.entries(icons).map(([name, Icon]) => (
               <button
@@ -133,7 +145,7 @@ function Builder({ original }: { original?: Habit }) {
               </button>
             ))}
           </div>
-          <label>Make it yours</label>
+          <label>{t('Make it yours')}</label>
           <div className="picker colors">
             {['#8B5CF6', '#22A77B', '#F68B38', '#4399E8', '#E86796', '#716594'].map((color) => (
               <button
@@ -150,31 +162,31 @@ function Builder({ original }: { original?: Habit }) {
           </div>
         </section>
         <section className="panel">
-          <h2>How will you track it?</h2>
+          <h2>{t('How will you track it?')}</h2>
           <div className="tracking-picker">
-            {(['boolean', 'count', 'steps', 'duration'] as Tracking[]).map((t) => (
+            {(['boolean', 'count', 'steps', 'duration'] as Tracking[]).map((mode) => (
               <button
                 type="button"
-                className={h.tracking === t ? 'selected' : ''}
-                key={t}
-                onClick={() => patch({ tracking: t })}
+                className={h.tracking === mode ? 'selected' : ''}
+                key={mode}
+                onClick={() => patch({ tracking: mode })}
               >
                 <strong>
-                  {
+                  {t(
                     { boolean: 'Check off', count: 'Count', steps: 'Steps', duration: 'Duration' }[
-                      t
-                    ]
-                  }
+                      mode
+                    ],
+                  )}
                 </strong>
                 <small>
-                  {
+                  {t(
                     {
                       boolean: 'A simple daily win',
                       count: 'Pages, glasses & more',
                       steps: 'One step at a time',
                       duration: 'Minutes that matter',
-                    }[t]
-                  }
+                    }[mode],
+                  )}
                 </small>
               </button>
             ))}
@@ -182,7 +194,7 @@ function Builder({ original }: { original?: Habit }) {
           {['count', 'duration'].includes(h.tracking) && (
             <div className="two-col">
               <label>
-                Daily target
+                {t('Daily target')}
                 <input
                   type="number"
                   min="1"
@@ -192,9 +204,9 @@ function Builder({ original }: { original?: Habit }) {
                 />
               </label>
               <label>
-                Unit
+                {t('Unit')}
                 <input
-                  value={h.tracking === 'duration' ? 'minutes' : h.unit}
+                  value={h.tracking === 'duration' ? t('minutes') : h.unit}
                   disabled={h.tracking === 'duration'}
                   onChange={(e) => patch({ unit: e.target.value })}
                 />
@@ -210,18 +222,20 @@ function Builder({ original }: { original?: Habit }) {
                   patch({
                     unit: 'prayers',
                     steps: ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((name) => ({
-                      id: h.steps.find((s) => s.name === name)?.id || crypto.randomUUID(),
-                      name,
+                      id:
+                        h.steps.find((s) => s.name === name || s.name === bn[name])?.id ||
+                        crypto.randomUUID(),
+                      name: t(name),
                     })),
                   })
                 }
               >
-                Use five-prayer template
+                {t('Use five-prayer template')}
               </Button>
               {h.steps.map((s, i) => (
                 <div className="step-row" key={s.id}>
                   <input
-                    aria-label={`Step ${i + 1}`}
+                    aria-label={t('Step {count}', { count: i + 1 })}
                     value={s.name}
                     onChange={(e) =>
                       patch({
@@ -233,7 +247,7 @@ function Builder({ original }: { original?: Habit }) {
                   />
                   <button
                     type="button"
-                    aria-label="Move step up"
+                    aria-label={t('Move step up')}
                     disabled={i === 0}
                     onClick={() => {
                       const steps = [...h.steps];
@@ -245,7 +259,7 @@ function Builder({ original }: { original?: Habit }) {
                   </button>
                   <button
                     type="button"
-                    aria-label="Move step down"
+                    aria-label={t('Move step down')}
                     disabled={i === h.steps.length - 1}
                     onClick={() => {
                       const steps = [...h.steps];
@@ -257,7 +271,7 @@ function Builder({ original }: { original?: Habit }) {
                   </button>
                   <button
                     type="button"
-                    aria-label="Delete step"
+                    aria-label={t('Delete step')}
                     onClick={() => patch({ steps: h.steps.filter((step) => step.id !== s.id) })}
                   >
                     <Trash2 size={17} />
@@ -272,15 +286,15 @@ function Builder({ original }: { original?: Habit }) {
                 }
               >
                 <Plus size={17} />
-                Add a step
+                {t('Add a step')}
               </Button>
             </div>
           )}
         </section>
         <section className="panel">
-          <h2>Find your rhythm</h2>
+          <h2>{t('Find your rhythm')}</h2>
           <label>
-            Schedule
+            {t('Schedule')}
             <select
               value={h.weekdays.length === 7 ? 'daily' : 'selected'}
               onChange={(e) =>
@@ -289,8 +303,8 @@ function Builder({ original }: { original?: Habit }) {
                 })
               }
             >
-              <option value="daily">Every day</option>
-              <option value="selected">Selected weekdays</option>
+              <option value="daily">{t('Every day')}</option>
+              <option value="selected">{t('Selected weekdays')}</option>
             </select>
           </label>
           <div className="day-picker">
@@ -308,15 +322,15 @@ function Builder({ original }: { original?: Habit }) {
                   })
                 }
               >
-                {d}
+                {t(d)}
               </button>
             ))}
           </div>
         </section>
         <section className="panel">
-          <h2>Gentle reminder</h2>
+          <h2>{t('Gentle reminder')}</h2>
           <label className="toggle-row">
-            <span>Remind me on scheduled days</span>
+            <span>{t('Remind me on scheduled days')}</span>
             <input
               type="checkbox"
               role="switch"
@@ -330,7 +344,7 @@ function Builder({ original }: { original?: Habit }) {
           </label>
           {h.reminder?.enabled && (
             <label>
-              Local time
+              {t('Local time')}
               <input
                 type="time"
                 required
@@ -340,7 +354,7 @@ function Builder({ original }: { original?: Habit }) {
             </label>
           )}
           <p className="muted reminder-limit">
-            Web reminders are shown while Ovgen is open. Completed habits are skipped.
+            {t('Web reminders are shown while Ovgen is open. Completed habits are skipped.')}
           </p>
         </section>
         {error && (
@@ -349,7 +363,7 @@ function Builder({ original }: { original?: Habit }) {
           </p>
         )}
         <Button className="save" disabled={saving}>
-          {saving ? 'Saving…' : original ? 'Save changes' : 'Create habit'}
+          {saving ? t('Saving…') : original ? t('Save changes') : t('Create habit')}
           <Check size={18} />
         </Button>
       </form>

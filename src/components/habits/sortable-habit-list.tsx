@@ -1,3 +1,4 @@
+import { t } from '../../lib/i18n';
 import {
   DndContext,
   TouchSensor,
@@ -42,7 +43,7 @@ function SortableHabit({
       }}
       className={isDragging ? 'sortable-habit dragging' : 'sortable-habit'}
       {...attributes}
-      aria-label={`Reorder ${habit.name}`}
+      aria-label={t('Reorder {name}', { name: habit.name })}
       {...listeners}
       onContextMenu={(e) => e.preventDefault()}
     >

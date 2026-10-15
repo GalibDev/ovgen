@@ -45,7 +45,12 @@ export const localDate = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 export const dayDate = (d: string) => new Date(`${d}T12:00:00`);
 export const scheduled = (h: Habit, d: string) =>
-  !h.archived && h.createdAt.slice(0, 10) <= d && h.weekdays.includes(dayDate(d).getDay());
+  h.createdAt.slice(0, 10) <= d &&
+  h.weekdays.includes(dayDate(d).getDay()) &&
+  !(h.inactivePeriods || []).some(
+    (period) => d >= period.from && (!period.until || d < period.until),
+  ) &&
+  !((h.archived || h.paused) && !h.inactivePeriods?.length && d >= localDate());
 export const percent = (h: Habit, p?: Progress) =>
   Math.round(
     Math.min(
@@ -87,6 +92,12 @@ export async function deleteHabit(id: string) {
       .where(':id')
       .startsWith('reminder:' + id + ':')
       .delete();
+    const timer = await db.meta.get('focus:active');
+    if (typeof timer?.value === 'string') {
+      try {
+        if (JSON.parse(timer.value).habitId === id) await db.meta.delete('focus:active');
+      } catch {}
+    }
     await db.habits.delete(id);
   });
 }

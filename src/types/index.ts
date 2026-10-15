@@ -17,6 +17,8 @@ export interface Habit {
   weekdays: number[];
   createdAt: string;
   archived: boolean;
+  paused?: boolean;
+  inactivePeriods?: { from: string; until?: string }[];
   reminder?: { enabled: boolean; time: string };
 }
 export interface Progress {

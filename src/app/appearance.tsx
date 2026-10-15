@@ -1,3 +1,4 @@
+import { t } from '../lib/i18n';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { usePreferences } from '../stores/preferences';
 import { themeColors } from '../styles/palette';
@@ -71,8 +72,8 @@ export function AppearanceSettings() {
   const { colorDepth, setColorDepth, theme, setTheme } = usePreferences();
   return (
     <section className="panel appearance-settings">
-      <h2>Appearance</h2>
-      <div className="theme-options" role="group" aria-label="Color theme">
+      <h2>{t('Appearance')}</h2>
+      <div className="theme-options" role="group" aria-label={t('Color theme')}>
         {(['light', 'dark', 'system'] as const).map((mode) => (
           <button
             key={mode}
@@ -80,14 +81,15 @@ export function AppearanceSettings() {
             aria-pressed={theme === mode}
             onClick={() => setTheme(mode)}
           >
-            {mode === 'light' ? '☀ Light' : mode === 'dark' ? '☾ Dark' : 'System'}
+            {mode === 'light' ? t('☀ Light') : mode === 'dark' ? t('☾ Dark') : t('System')}
           </button>
         ))}
       </div>
       <label htmlFor="color-depth">
-        Color intensity <strong>{colorDepth}%</strong>
+        {t('Color intensity')}
+        <strong>{colorDepth}%</strong>
       </label>
-      <p className="muted">Choose the shade that feels right for you.</p>
+      <p className="muted">{t('Choose the shade that feels right for you.')}</p>
       <input
         id="color-depth"
         type="range"
@@ -96,12 +98,12 @@ export function AppearanceSettings() {
         step="1"
         value={colorDepth}
         onChange={(e) => setColorDepth(Number(e.target.value))}
-        aria-valuetext={colorDepth < 40 ? 'Light' : colorDepth > 60 ? 'Deep' : 'Balanced'}
+        aria-valuetext={colorDepth < 40 ? t('Light') : colorDepth > 60 ? t('Deep') : t('Balanced')}
       />
       <div className="range-labels">
-        <span>Light</span>
-        <button onClick={() => setColorDepth(50)}>Reset</button>
-        <span>Deep</span>
+        <span>{t('Light')}</span>
+        <button onClick={() => setColorDepth(50)}>{t('Reset')}</button>
+        <span>{t('Deep')}</span>
       </div>
       <div className="color-preview">
         <span />
@@ -109,7 +111,7 @@ export function AppearanceSettings() {
         <span />
         <span />
       </div>
-      <p className="muted">Saved automatically on this device.</p>
+      <p className="muted">{t('Saved automatically on this device.')}</p>
     </section>
   );
 }

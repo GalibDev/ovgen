@@ -1,3 +1,5 @@
+import { t } from '../../lib/i18n';
+import { setHabitStatus } from '../../features/habits/status';
 import { habitTone } from '../../lib/theme';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -17,7 +19,7 @@ export function Controls({
 }) {
   const notify = useAppStore((s) => s.notify);
   const run = (task: Promise<unknown>) => {
-    void task.catch(() => notify('Could not save progress. Please try again.'));
+    void task.catch(() => notify(t('Could not save progress. Please try again.')));
   };
   if (h.tracking === 'steps')
     return (
@@ -41,32 +43,32 @@ export function Controls({
         onClick={() => run(updateProgress(h, date, (p) => ({ ...p, value: p.value ? 0 : 1 })))}
       >
         <Check size={16} />
-        {p?.value ? 'Completed · undo' : 'Mark complete'}
+        {p?.value ? t('Completed · undo') : t('Mark complete')}
       </button>
     );
   return (
     <div className="counter">
       <button
-        aria-label={`Decrease ${h.name}`}
+        aria-label={t('Decrease {name}', { name: h.name })}
         disabled={!p?.value}
         onClick={() => run(changeValue(h, date, h.tracking === 'duration' ? -5 : -1))}
       >
         <Minus size={16} />
       </button>
       <span>
-        {p?.value || 0} / {h.target} {h.unit}
+        {p?.value || 0} / {h.target} {t(h.unit)}
       </span>
       <button
-        aria-label={`Increase ${h.name}`}
+        aria-label={t('Increase {name}', { name: h.name })}
         onClick={() => run(changeValue(h, date, h.tracking === 'duration' ? 5 : 1))}
       >
         <Plus size={16} />
       </button>
       {h.tracking === 'duration' && (
         <label className="manual">
-          Minutes
+          {t('Minutes')}
           <input
-            aria-label="Record completed minutes"
+            aria-label={t('Record completed minutes')}
             type="number"
             min="0"
             value={p?.value || 0}
@@ -116,7 +118,7 @@ export function HabitCard({
           <div className="menu-wrap">
             <button
               className="more"
-              aria-label={`Options for ${h.name}`}
+              aria-label={t('Options for {name}', { name: h.name })}
               aria-expanded={menu}
               onClick={() => setMenu(!menu)}
             >
@@ -126,23 +128,63 @@ export function HabitCard({
               <div className="menu">
                 <Link to={`/habits/${h.id}`}>
                   <ArrowUpRight size={15} />
-                  View details
+                  {t('View details')}
                 </Link>
                 <Link to={`/habits/${h.id}/edit`}>
                   <Pencil size={15} />
-                  Edit habit
+                  {t('Edit habit')}
                 </Link>
+                {!h.archived && (
+                  <button
+                    onClick={() => {
+                      if (
+                        !h.paused &&
+                        !confirm(
+                          t(
+                            'Pause or archive this habit? Any active focus timer for it will be cancelled.',
+                          ),
+                        )
+                      )
+                        return;
+                      void setHabitStatus(h.id, h.paused ? 'active' : 'paused')
+                        .then(() => notify(t(h.paused ? t('Habit resumed') : t('Habit paused'))))
+                        .catch(() => notify(t('Could not update habit')));
+                      setMenu(false);
+                    }}
+                  >
+                    {t(h.paused ? t('Resume habit') : t('Pause habit'))}
+                  </button>
+                )}
                 <button
                   onClick={() => {
-                    if (confirm(`Delete ${h.name} and its history?`))
+                    if (
+                      !h.archived &&
+                      !confirm(
+                        t(
+                          'Pause or archive this habit? Any active focus timer for it will be cancelled.',
+                        ),
+                      )
+                    )
+                      return;
+                    void setHabitStatus(h.id, h.archived ? 'active' : 'archived')
+                      .then(() => notify(t(h.archived ? t('Habit resumed') : t('Habit archived'))))
+                      .catch(() => notify(t('Could not update habit')));
+                    setMenu(false);
+                  }}
+                >
+                  {t(h.archived ? t('Restore habit') : t('Archive habit'))}
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm(t('Delete {name} and its history?', { name: h.name })))
                       void deleteHabit(h.id)
-                        .then(() => notify('Habit deleted'))
-                        .catch(() => notify('Could not delete habit'));
+                        .then(() => notify(t('Habit deleted')))
+                        .catch(() => notify(t('Could not delete habit')));
                     setMenu(false);
                   }}
                 >
                   <Trash2 size={15} />
-                  Delete habit
+                  {t('Delete habit')}
                 </button>
               </div>
             )}
@@ -151,14 +193,18 @@ export function HabitCard({
         <p className="habit-sub">
           {h.tracking === 'boolean'
             ? n
-              ? 'A little win for today'
-              : 'Ready when you are'
-            : `${amount} / ${h.tracking === 'steps' ? h.steps.length : h.target} ${h.unit}`}
+              ? t('A little win for today')
+              : t('Ready when you are')
+            : `${amount} / ${h.tracking === 'steps' ? h.steps.length : h.target} ${t(h.unit)}`}
         </p>
         <div className="progress-track">
           <span style={{ width: `${n}%`, background: habitTone(h.color) }} />
         </div>
-        <Controls habit={h} progress={p} date={date} />
+        {h.archived || h.paused ? (
+          <p className="muted inactive-label">{t(h.archived ? t('Archived') : t('Paused'))}</p>
+        ) : (
+          <Controls habit={h} progress={p} date={date} />
+        )}
       </div>
     </article>
   );

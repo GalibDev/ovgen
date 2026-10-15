@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 export const usePreferences = create<{
   colorDepth: number;
+  language: 'en' | 'bn';
+  setLanguage: (language: 'en' | 'bn') => void;
   theme: 'light' | 'dark' | 'system';
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   remindersEnabled: boolean;
@@ -15,6 +17,8 @@ export const usePreferences = create<{
   persist(
     (set) => ({
       colorDepth: 50,
+      language: 'en',
+      setLanguage: (language) => set({ language }),
       theme: 'system',
       setTheme: (theme) => set({ theme }),
       remindersEnabled: true,

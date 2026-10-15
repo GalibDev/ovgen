@@ -1,3 +1,4 @@
+import { t } from '../lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Bell, X } from 'lucide-react';
@@ -52,10 +53,10 @@ export function ReminderSettings() {
       setBrowserNotifications(result === 'granted');
       setMessage(
         result === 'granted'
-          ? 'Browser notifications enabled.'
+          ? t('Browser notifications enabled.')
           : result === 'denied'
-            ? 'Notifications are blocked. Change your browser’s site permissions to allow them.'
-            : 'Permission was not granted. In-app reminders still work.',
+            ? t('Notifications are blocked. Change your browser’s site permissions to allow them.')
+            : t('Permission was not granted. In-app reminders still work.'),
       );
     } catch {
       setMessage('This browser could not enable notifications. In-app reminders still work.');
@@ -67,11 +68,12 @@ export function ReminderSettings() {
     <section className="panel reminder-settings">
       <h2>
         <Bell size={21} />
-        Reminders
+        {t('Reminders')}
       </h2>
       <label className="toggle-row">
         <span>
-          Habit reminders<small>Show a reminder when a scheduled habit is due.</small>
+          {t('Habit reminders')}
+          <small>{t('Show a reminder when a scheduled habit is due.')}</small>
         </span>
         <input
           type="checkbox"
@@ -81,18 +83,18 @@ export function ReminderSettings() {
         />
       </label>
       <p className="muted reminder-limit">
-        Web reminders work while Ovgen is open. Closed-app and reliable background reminders require
-        a future Android app or push service. On iPhone, browser notifications may require adding
-        Ovgen to your Home Screen.
+        {t(
+          'Web reminders work while Ovgen is open. Closed-app and reliable background reminders require a future Android app or push service. On iPhone, browser notifications may require adding Ovgen to your Home Screen.',
+        )}
       </p>
       <div className="notification-actions">
         {permission === 'unsupported' ? (
           <p className="muted">
-            Browser notifications are unavailable here. In-app reminders are available.
+            {t('Browser notifications are unavailable here. In-app reminders are available.')}
           </p>
         ) : permission === 'granted' ? (
           <label className="toggle-row">
-            <span>Browser notifications</span>
+            <span>{t('Browser notifications')}</span>
             <input
               type="checkbox"
               role="switch"
@@ -103,10 +105,10 @@ export function ReminderSettings() {
         ) : (
           <Button variant="outline" disabled={busy || permission === 'denied'} onClick={enable}>
             {busy
-              ? 'Requesting…'
+              ? t('Requesting…')
               : permission === 'denied'
-                ? 'Blocked in browser settings'
-                : 'Enable browser notifications'}
+                ? t('Blocked in browser settings')
+                : t('Enable browser notifications')}
           </Button>
         )}
         {permission === 'granted' && (
@@ -117,14 +119,14 @@ export function ReminderSettings() {
                 .then((ok) =>
                   setMessage(
                     ok
-                      ? 'Test notification sent.'
-                      : 'Could not show a notification on this device.',
+                      ? t('Test notification sent.')
+                      : t('Could not show a notification on this device.'),
                   ),
                 )
                 .catch(() => setMessage('Could not send the notification.'));
             }}
           >
-            Send test notification
+            {t('Send test notification')}
           </Button>
         )}
       </div>
@@ -139,7 +141,7 @@ export function ReminderSettings() {
           .map((h) => (
             <Link key={h.id} to={`/habits/${h.id}/edit`}>
               <span>{h.name}</span>
-              <strong>{h.reminder?.enabled ? h.reminder.time : 'Set reminder'}</strong>
+              <strong>{h.reminder?.enabled ? h.reminder.time : t('Set reminder')}</strong>
             </Link>
           ))}
       </div>
@@ -195,8 +197,8 @@ export function useReminders() {
             delivered.push(h);
             if (browserNotifications)
               await showNotification(
-                'A little time for you',
-                `Time for ${h.name}.`,
+                t('A little time for you'),
+                t('Time for {name}.', { name: h.name }),
                 `${h.id}:${date}`,
                 `/habits/${h.id}`,
               ).catch(() => false);
@@ -236,10 +238,10 @@ export function ReminderBanner({ due, dismiss }: { due: Habit[]; dismiss: () => 
     <aside className="reminder-banner" role="status">
       <Bell size={20} />
       <div>
-        <strong>A little time for you</strong>
+        <strong>{t('A little time for you')}</strong>
         <p>{due.map((h) => h.name).join(' · ')}</p>
         <Link to={due.length === 1 ? `/habits/${due[0].id}` : '/habits'} onClick={dismiss}>
-          Open habits
+          {t('Open habits')}
         </Link>
       </div>
       <button aria-label="Dismiss reminder" onClick={dismiss}>
