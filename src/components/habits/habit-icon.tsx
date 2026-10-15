@@ -28,7 +28,7 @@ export const icons: Record<string, LucideIcon> = {
 export function HabitIcon({ name, color }: { name: string; color: string }) {
   const Icon = icons[name] || Sprout;
   return (
-    <span className="habit-icon" style={{ color, background: `${color}14` }}>
+    <span className="habit-icon" style={{ color, background: `${color}25` }}>
       <Icon size={30} strokeWidth={1.8} />
     </span>
   );

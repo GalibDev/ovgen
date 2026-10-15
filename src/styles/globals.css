@@ -1,14 +1,14 @@
 @import 'tailwindcss';
 @theme {
   --color-primary: #6b58e8;
-  --color-background: #f8f8fc;
+  --color-background: #f3f1fa;
   --color-foreground: #18192d;
   --font-sans: 'Inter', 'Segoe UI', sans-serif;
 }
 :root {
   font-family: var(--font-sans);
   color: #18192d;
-  background: #f8f8fc;
+  background: #f3f1fa;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   font-weight: 400;
@@ -104,7 +104,7 @@ main {
   margin-bottom: 13px;
 }
 .page-header p {
-  color: #838298;
+  color: #68657c;
   font-size: 17px;
   margin-top: 10px;
 }
@@ -116,12 +116,12 @@ main {
   display: grid;
   place-items: center;
   color: #7550e9;
-  background: #eee8ff;
+  background: #e2d7ff;
   flex-shrink: 0;
   box-shadow: 0 6px 18px #7563a514;
 }
 .summary {
-  background: #f0ecff;
+  background: #e7dfff;
   position: relative;
   overflow: hidden;
   border-radius: 25px;
@@ -141,7 +141,7 @@ main {
   font-size: 26px;
 }
 .summary p {
-  color: #85809f;
+  color: #6c5e8a;
   margin-top: 9px;
   font-size: 16px;
 }
@@ -159,19 +159,19 @@ main {
   height: 9px;
   overflow: hidden;
   border-radius: 20px;
-  background: #f0ecff;
+  background: #e7dfff;
 }
 .progress-track span {
   display: block;
   height: 100%;
   border-radius: 20px;
-  background: #8b5cf6;
+  background: #7c3aed;
   transition: width 0.35s ease;
 }
 .summary-progress .progress-track {
   flex: 1;
   height: 12px;
-  background: #d8cbff;
+  background: #c6b2fa;
 }
 .growth-art {
   position: absolute;
@@ -195,7 +195,7 @@ main {
 }
 .hill {
   position: absolute;
-  background: #dfd3ff;
+  background: #cbb5f8;
   width: 160px;
   height: 100px;
   transform: rotate(-30deg);
@@ -206,7 +206,7 @@ main {
 .hill.two {
   right: 60px;
   bottom: -60px;
-  background: #e7dfff;
+  background: #dcc9ff;
   transform: rotate(30deg);
 }
 .section-title {
@@ -226,7 +226,7 @@ main {
 .count {
   font-size: 12px;
   color: #a09aac;
-  background: #f0ecff;
+  background: #e7dfff;
   border-radius: 20px;
   padding: 4px 9px;
   vertical-align: middle;
@@ -249,7 +249,7 @@ main {
   box-shadow: 0 5px 15px #29204103;
 }
 .filters button.active {
-  background: #7952e8;
+  background: #6840db;
   color: #fff;
   box-shadow: 0 5px 12px #7952e824;
 }
@@ -260,7 +260,7 @@ main {
   color: #a09bad;
   margin: 9px 0 18px;
   padding: 10px 16px;
-  border: 1px solid #eae8f1;
+  border: 1px solid #ded7eb;
   border-radius: 14px;
   background: #ffffff80;
 }
@@ -287,7 +287,7 @@ main {
   padding: 23px;
   display: flex;
   gap: 19px;
-  box-shadow: 0 7px 30px #241d4804;
+  box-shadow: 0 7px 30px #35215c0b;
   border: 1px solid #ffffff;
 }
 .habit-icon {
@@ -317,7 +317,7 @@ main {
 .percent {
   font-weight: 650;
   color: var(--habit-color);
-  background: color-mix(in srgb, var(--habit-color) 11%, white);
+  background: color-mix(in srgb, var(--habit-color) 18%, white);
   font-size: 13px;
   border-radius: 25px;
   padding: 7px 12px;
@@ -328,7 +328,7 @@ main {
   display: flex;
 }
 .habit-sub {
-  color: #908aa0;
+  color: #70667f;
   font-size: 14px;
   margin: 4px 0 12px;
 }
@@ -373,7 +373,7 @@ main {
   gap: 5px;
   align-items: center;
   font-size: 10px;
-  color: #9991a6;
+  color: #756a85;
   border-radius: 8px;
   padding: 7px 8px;
   background: #faf9fc;
@@ -387,12 +387,12 @@ main {
   place-items: center;
 }
 .step.checked {
-  background: #f1ecff;
+  background: #e5d9ff;
   color: #8055df;
 }
 .step.checked > span {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  background: #7c3aed;
+  border-color: #7c3aed;
   color: #fff;
 }
 .counter {
@@ -406,21 +406,21 @@ main {
   width: 29px;
   height: 29px;
   border-radius: 50%;
-  background: #f5f2fc;
+  background: #eee5ff;
   display: grid;
   place-items: center;
-  color: var(--habit-color, #7952e8);
+  color: var(--habit-color, #6840db);
 }
 .counter > span {
   font-size: 11px;
-  color: #9690a2;
+  color: #746981;
 }
 .manual {
   display: flex;
   gap: 6px;
   align-items: center;
   font-size: 10px;
-  color: #9690a2;
+  color: #746981;
   margin: 0 0 0 auto !important;
 }
 .manual input {
@@ -450,7 +450,7 @@ main {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #a39cad;
+  color: #82758e;
   margin: 28px 0;
 }
 .bottom-nav {
@@ -475,7 +475,7 @@ main {
   align-items: center;
   flex-direction: column;
   gap: 7px;
-  color: #9590a4;
+  color: #746a83;
   width: 20%;
   position: relative;
 }
@@ -504,7 +504,7 @@ main {
   color: white;
   margin-top: -33px;
   box-shadow: 0 5px 13px #7749d92b;
-  border: 4px solid #f8f8fc;
+  border: 4px solid #f3f1fa;
 }
 .bottom-nav .nav-add svg {
   width: 29px;
@@ -528,7 +528,7 @@ main {
   min-height: 44px;
 }
 .primary {
-  background: #7852e6;
+  background: #6840db;
   color: white;
   box-shadow: 0 5px 18px #7852e619;
 }
@@ -538,15 +538,15 @@ main {
   color: #7c649e;
 }
 .ghost {
-  color: #7952e8;
-  background: #f5f1fe;
+  color: #6840db;
+  background: #eee3ff;
 }
 .panel {
   background: white;
   padding: 27px;
   border-radius: 23px;
   margin: 0 0 20px;
-  box-shadow: 0 7px 30px #241d4804;
+  box-shadow: 0 7px 30px #35215c0b;
 }
 .panel > h2 {
   margin-bottom: 19px;
@@ -558,7 +558,7 @@ main {
   align-items: center;
   text-align: center;
   gap: 15px;
-  color: #9690a5;
+  color: #776985;
 }
 .empty h2 {
   color: #363044;
@@ -567,7 +567,7 @@ main {
   font-size: 14px;
 }
 .empty a {
-  color: #7952e8;
+  color: #6840db;
 }
 .empty .primary {
   color: white;
@@ -577,7 +577,7 @@ main {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #8c839f;
+  color: #736181;
   width: max-content;
   max-width: 100%;
 }
@@ -609,7 +609,7 @@ main {
 .builder select {
   display: block;
   width: 100%;
-  border: 1px solid #e9e4f1;
+  border: 1px solid #ddd4eb;
   background: #fcfbfe;
   color: #292036;
   border-radius: 11px;
@@ -633,10 +633,10 @@ main {
   border-radius: 12px;
   display: grid;
   place-items: center;
-  color: #aaa0ba;
+  color: #8c7b9f;
 }
 .picker button.selected {
-  background: #eee6ff;
+  background: #e2d5ff;
   color: #8053e8;
   outline: 2px solid #b99af6;
 }
@@ -665,11 +665,11 @@ main {
 .tracking-picker small {
   display: block;
   font-size: 11px;
-  color: #a397b2;
+  color: #79698c;
   margin-top: 6px;
 }
 .tracking-picker .selected {
-  background: #f4efff;
+  background: #eadfff;
   border-color: #b79bef;
   color: #7952d6;
 }
@@ -708,10 +708,10 @@ main {
   background: #f9f7fc;
   padding: 12px;
   border-radius: 10px;
-  color: #9d91af;
+  color: #79658d;
 }
 .day-picker .selected {
-  background: #eee6ff;
+  background: #e2d5ff;
   color: #8053e8;
 }
 .save {
@@ -719,7 +719,7 @@ main {
   margin-bottom: 20px;
 }
 .muted {
-  color: #9c92a9;
+  color: #766982;
   font-weight: 400;
   font-size: 13px;
 }
@@ -756,7 +756,7 @@ main {
   color: #61546f;
 }
 .week .active {
-  background: #7c56e6;
+  background: #6840db;
   color: #ddd1ff;
   box-shadow: 0 6px 20px #7852e627;
 }
@@ -782,7 +782,7 @@ main {
 }
 .momentum p {
   font-size: 12px;
-  color: #a198ab;
+  color: #776a86;
   margin-top: 6px;
 }
 .momentum > svg {
@@ -806,10 +806,10 @@ main {
   border-radius: 50%;
   font-weight: 700;
   font-size: 15px;
-  color: #7952e8;
+  color: #6840db;
 }
 .greeting-dot {
-  color: #8b5cf6;
+  color: #7c3aed;
 }
 .detail-progress .progress-track {
   margin: 20px 0;
@@ -836,7 +836,7 @@ main {
   padding: 13px 16px;
 }
 .detail-progress .counter {
-  --habit-color: #7952e8;
+  --habit-color: #6840db;
 }
 .history-row {
   display: flex;
@@ -854,7 +854,7 @@ main {
 .history-row small {
   display: block;
   font-size: 10px;
-  color: #a69caf;
+  color: #80718e;
   margin-top: 5px;
 }
 .history-row strong {
@@ -884,7 +884,7 @@ main {
 }
 .stats-grid p {
   font-size: 12px;
-  color: #aa9ab7;
+  color: #7c698b;
 }
 .chart {
   display: flex;
@@ -898,7 +898,7 @@ main {
   align-items: center;
   flex-direction: column;
   gap: 10px;
-  color: #a596b7;
+  color: #7a658d;
   font-size: 11px;
 }
 .bar-space {
@@ -913,7 +913,7 @@ main {
 }
 .bar-space > div {
   width: 100%;
-  background: #a488e9;
+  background: #8758db;
   border-radius: 7px;
 }
 .chart small {
@@ -948,12 +948,12 @@ main {
   margin: 0 auto 20px;
 }
 .profile-card p {
-  color: #9d91ab;
+  color: #786786;
   font-size: 13px;
   margin: 10px 0 22px;
 }
 .badge {
-  background: #f4edff;
+  background: #e8dcff;
   color: #9776c2;
   padding: 8px 13px;
   border-radius: 20px;
@@ -975,7 +975,7 @@ main {
 .info-row p {
   font-size: 12px;
   line-height: 1.7;
-  color: #a397af;
+  color: #786a87;
   margin-top: 5px;
 }
 .profile-link {
@@ -1044,7 +1044,7 @@ main {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #7952e8;
+    color: #6840db;
   }
   .desktop-brand > a > span {
     font-size: 30px;
@@ -1056,7 +1056,7 @@ main {
     color: #9166e9;
   }
   .desktop-brand > p {
-    color: #aa9db9;
+    color: #827090;
     font-size: 11px;
     margin: 10px 0 40px;
   }
@@ -1078,7 +1078,7 @@ main {
   .sidebar-note p {
     font-size: 11px;
     line-height: 1.8;
-    color: #b2a3c4;
+    color: #8a749f;
   }
   .bottom-nav {
     left: 25px;
@@ -1103,7 +1103,7 @@ main {
     gap: 15px;
   }
   .bottom-nav .active {
-    background: #f0e9ff;
+    background: #e5d9ff;
   }
   .bottom-nav .active:after {
     display: none;
@@ -1127,7 +1127,7 @@ main {
     order: 5;
   }
   .bottom-nav .nav-add.active > span {
-    color: #7952e8;
+    color: #6840db;
   }
   .toast {
     left: calc(50% + 120px);
