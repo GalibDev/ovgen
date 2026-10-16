@@ -16,10 +16,10 @@ import { useAppStore } from '../../stores/app';
 import { Button } from '../../components/ui/button';
 import { t, locale } from '../../lib/i18n';
 import type { Habit } from '../../types';
-function useSession() {
+export function useSession() {
   return useLiveQuery(async () => parseSession((await db.meta.get('focus:active'))?.value), []);
 }
-function useClock(enabled = true) {
+export function useClock(enabled = true) {
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
     const refresh = () => setNow(Date.now());
@@ -36,7 +36,7 @@ function useClock(enabled = true) {
   }, [enabled]);
   return now;
 }
-const clock = (ms: number) => {
+export const clock = (ms: number) => {
   const seconds = Math.ceil(ms / 1000);
   return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 };
@@ -50,7 +50,12 @@ export function useFocusCompletion() {
       .then((done) => {
         if (done)
           notify(
-            t('{minutes} minutes added to {name}.', { minutes: done.minutes, name: done.name }),
+            done.linked
+              ? t('{minutes} minutes added to {name}.', { minutes: done.minutes, name: done.name })
+              : t('{minutes} minutes of {activity} completed.', {
+                  minutes: done.minutes,
+                  activity: done.custom ? done.name : t(done.name),
+                }),
           );
       })
       .catch(() => notify(t('Timer could not be saved. Try again.')));
@@ -114,7 +119,10 @@ export function FocusTimer({ habit }: { habit: Habit }) {
           </div>
         </>
       ) : session ? (
-        <Link className="profile-link" to={`/habits/${session.habitId}`}>
+        <Link
+          className="profile-link"
+          to={session.habitId ? `/habits/${session.habitId}` : '/focus'}
+        >
           {t('Finish or cancel your current focus session first.')} →
         </Link>
       ) : (
@@ -154,12 +162,12 @@ export function FocusBar() {
     [session?.habitId],
   );
   const notify = useAppStore((s) => s.notify);
-  if (!session || !habit) return null;
+  if (!session || (session.habitId && !habit)) return null;
   return (
     <aside className="focus-bar">
       <Timer size={21} />
-      <Link to={`/habits/${session.habitId}`}>
-        <strong>{habit.name}</strong>
+      <Link to={session.habitId ? `/habits/${session.habitId}` : '/focus'}>
+        <strong>{habit?.name || session.label || t(session.activity || 'Focus session')}</strong>
         <span>{session.status === 'paused' ? t('Paused') : clock(remaining(session, now))}</span>
       </Link>
       <button

@@ -1,3 +1,4 @@
+import { FocusScreen } from '../features/habits/focus-screen';
 import { Notes, NoteEditor } from '../features/notes/notes';
 import { WeeklyReview } from '../features/insights/weekly-review';
 import { HomeSettings } from './home-settings';
@@ -41,6 +42,7 @@ import {
   ChevronRight,
   Settings,
   StickyNote,
+  Timer,
 } from 'lucide-react';
 import { db, seed, localDate, dayDate, scheduled, percent, deleteHabit } from '../lib/db';
 import { useAppStore } from '../stores/app';
@@ -293,6 +295,14 @@ function Dashboard() {
           <p>{t('Let’s make today a little meaningful.')}</p>
         </div>
         <div className="header-actions">
+          <Link
+            className="avatar timer-shortcut"
+            to="/focus"
+            aria-label={t('Focus timer')}
+            title={t('Focus timer')}
+          >
+            <Timer size={22} />
+          </Link>
           <Link
             className="avatar notes-shortcut"
             to="/notes"
@@ -747,6 +757,7 @@ function Shell() {
           <Route path="/habits/:id/edit" element={<HabitBuilder />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/focus" element={<FocusScreen />} />
           <Route path="/notes" element={<Notes />} />
           <Route path="/notes/new" element={<NoteEditor />} />
           <Route path="/notes/:id" element={<NoteEditor />} />

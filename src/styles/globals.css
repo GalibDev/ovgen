@@ -2518,3 +2518,217 @@ html[lang='bn'] .filters button {
     min-height: 340px;
   }
 }
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.activity-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 8px;
+  border-radius: 18px;
+  background: var(--surface, white);
+  border: 1px solid var(--tone-ded7eb, #ded7eb);
+  color: var(--tone-736181, #736181);
+  min-height: 100px;
+}
+.activity-grid strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+.activity-grid button.selected {
+  background: var(--tone-e7dfff, #e7dfff);
+  border-color: var(--tone-c6b2fa, #c6b2fa);
+  color: var(--tone-7953e4, #7953e4);
+}
+.standalone-timer {
+  text-align: center;
+  padding: 35px 30px;
+}
+.timer-eyebrow {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--tone-7953e4, #7953e4);
+}
+.timer-dial {
+  display: grid;
+  place-items: center;
+  width: 245px;
+  height: 245px;
+  border-radius: 50%;
+  margin: 26px auto;
+  background: conic-gradient(
+    var(--tone-8758db, #8758db) var(--timer-progress, 0%),
+    var(--tone-e7dfff, #e7dfff) 0
+  );
+  padding: 9px;
+}
+.timer-dial > div {
+  background: var(--surface, white);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.timer-digits {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+  color: var(--tone-7953e4, #7953e4);
+}
+.timer-dial small {
+  font-size: 11px;
+  color: var(--tone-736181, #736181);
+  padding: 0 12px;
+}
+.standalone-timer > .muted {
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 10px 0;
+}
+.standalone-timer .focus-actions {
+  justify-content: center;
+}
+.minute-presets {
+  display: flex;
+  gap: 8px;
+  margin: 26px 0;
+  justify-content: center;
+}
+.minute-presets button {
+  flex: 1;
+  border: 1px solid var(--tone-ded7eb, #ded7eb);
+  border-radius: 12px;
+  padding: 12px 5px;
+  font-size: 17px;
+  font-weight: 650;
+  background: var(--surface, white);
+  color: var(--tone-736181, #736181);
+}
+.minute-presets small {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  margin-top: 5px;
+}
+.minute-presets button.selected {
+  background: var(--tone-e7dfff, #e7dfff);
+  color: var(--tone-7953e4, #7953e4);
+  border-color: var(--tone-c6b2fa, #c6b2fa);
+}
+.timer-fields {
+  text-align: left;
+  display: grid;
+  gap: 17px;
+  margin: 22px 0;
+}
+.timer-fields label {
+  display: block;
+  font-size: 12px;
+  color: var(--tone-736181, #736181);
+  font-weight: 600;
+}
+.timer-fields input,
+.timer-fields select {
+  width: 100%;
+  display: block;
+  margin-top: 9px;
+  padding: 13px;
+  border-radius: 11px;
+  background: var(--surface, white);
+  border: 1px solid var(--tone-ded7eb, #ded7eb);
+  color: inherit;
+  font-size: 14px;
+}
+.start-timer {
+  width: 100%;
+}
+.standalone-timer > .timer-footnote {
+  font-size: 11px;
+  margin-top: 20px;
+}
+.session-history-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--tone-ded7eb, #ded7eb);
+  padding: 16px 0;
+}
+.session-check {
+  background: var(--tone-e7dfff, #e7dfff);
+  color: var(--tone-7953e4, #7953e4);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.session-history-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.session-history-row strong {
+  display: block;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.session-history-row small {
+  display: block;
+  color: var(--tone-736181, #736181);
+  font-size: 10px;
+  margin-top: 5px;
+}
+.session-history-row > span:last-child {
+  font-size: 11px;
+  color: var(--tone-7953e4, #7953e4);
+  white-space: nowrap;
+}
+.timer-shortcut {
+  background: var(--tone-e7dfff, #e7dfff);
+}
+@media (max-width: 600px) {
+  .activity-grid {
+    gap: 8px;
+  }
+  .activity-grid button {
+    padding: 16px 5px;
+    min-height: 92px;
+    border-radius: 15px;
+  }
+  .activity-grid strong {
+    font-size: 10px;
+  }
+  .activity-grid svg {
+    width: 22px;
+  }
+  .standalone-timer {
+    padding: 27px 21px;
+  }
+  .timer-dial {
+    width: 220px;
+    height: 220px;
+  }
+  .timer-digits {
+    font-size: 45px;
+  }
+  .header-actions {
+    gap: 6px;
+  }
+  .header-actions .avatar {
+    width: 36px;
+    height: 36px;
+  }
+  .page-header:has(.header-actions) h1 {
+    font-size: 32px;
+  }
+}
