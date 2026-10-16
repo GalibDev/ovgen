@@ -2732,3 +2732,71 @@ html[lang='bn'] .filters button {
     font-size: 32px;
   }
 }
+@media (max-width: 600px) {
+  main {
+    padding-top: calc(36px + env(safe-area-inset-top, 0px));
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  .page-header.home-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+    padding-top: 8px;
+    overflow: visible;
+  }
+  .page-header.home-header .header-actions {
+    align-self: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    gap: 7px;
+    overflow: visible;
+  }
+  .page-header.home-header .header-actions .avatar {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    flex-shrink: 0;
+    overflow: visible;
+  }
+  .page-header.home-header .header-actions svg {
+    display: block;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+  }
+  .page-header.home-header > div:first-child {
+    min-width: 0;
+  }
+  .page-header.home-header h1 {
+    font-size: 30px;
+    line-height: 1.35;
+  }
+  .bottom-nav {
+    bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+  }
+  .focus-bar {
+    bottom: calc(106px + env(safe-area-inset-bottom, 0px));
+  }
+  main {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+  }
+  .has-focus main {
+    padding-bottom: calc(205px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (max-width: 360px) {
+  .page-header.home-header .header-actions {
+    gap: 5px;
+  }
+  .page-header.home-header .header-actions .avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+  .page-header.home-header h1 {
+    font-size: 27px;
+  }
+}

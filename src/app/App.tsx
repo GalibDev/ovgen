@@ -279,7 +279,7 @@ function Dashboard() {
     : 0;
   return (
     <>
-      <header className="page-header">
+      <header className="page-header home-header">
         <div>
           <div className="eyebrow">
             {new Date().toLocaleDateString(locale(), {
