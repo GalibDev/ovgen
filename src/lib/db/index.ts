@@ -98,6 +98,10 @@ export async function deleteHabit(id: string) {
         if (JSON.parse(timer.value).habitId === id) await db.meta.delete('focus:active');
       } catch {}
     }
+    await db.meta
+      .where(':id')
+      .startsWith('milestone:' + id + ':')
+      .delete();
     await db.habits.delete(id);
   });
 }

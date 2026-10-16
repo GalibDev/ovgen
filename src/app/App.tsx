@@ -1,3 +1,7 @@
+import { Notes, NoteEditor } from '../features/notes/notes';
+import { WeeklyReview } from '../features/insights/weekly-review';
+import { HomeSettings } from './home-settings';
+import { HabitMilestones, MilestoneCelebration } from '../features/habits/milestone-panel';
 import { t, locale, useLanguage, LanguageSettings } from '../lib/i18n';
 import { Templates } from '../features/habits/templates-page';
 import { FocusTimer, FocusBar, useFocusCompletion } from '../features/habits/focus-timer';
@@ -36,6 +40,7 @@ import {
   Heart,
   ChevronRight,
   Settings,
+  StickyNote,
 } from 'lucide-react';
 import { db, seed, localDate, dayDate, scheduled, percent, deleteHabit } from '../lib/db';
 import { useAppStore } from '../stores/app';
@@ -241,6 +246,7 @@ function Habits() {
 function Dashboard() {
   const { habits, progress } = useData();
   const { date, setDate } = useAppStore();
+  const { showCalendar, showMomentum, showSalah } = usePreferences();
   const now = new Date();
   const greeting =
     now.getHours() < 12
@@ -286,43 +292,59 @@ function Dashboard() {
           </h1>
           <p>{t('Let’s make today a little meaningful.')}</p>
         </div>
-        <Link className="avatar" to="/profile" aria-label={t('Your profile')}>
-          <UserRound size={24} />
-        </Link>
-      </header>
-      <div className="week">
-        {week.map((d) => (
-          <button
-            disabled={localDate(d) > localDate()}
-            key={localDate(d)}
-            className={date === localDate(d) ? 'active' : ''}
-            onClick={() => setDate(localDate(d))}
+        <div className="header-actions">
+          <Link
+            className="avatar notes-shortcut"
+            to="/notes"
+            aria-label={t('My notes')}
+            title={t('My notes')}
           >
-            <span>{d.toLocaleDateString(locale(), { weekday: 'short' })}</span>
-            <strong>{d.getDate()}</strong>
-            <i className={localDate(d) === localDate() ? 'today' : ''} />
-          </button>
-        ))}
-      </div>
-      <Summary habits={habits} progress={progress} date={date} home />
-      <div className="momentum panel">
-        <div
-          className="ring"
-          style={
-            {
-              background: `conic-gradient(#6B58E8 ${total}%,#F0ECFF 0)`,
-              '--completion': `${total}%`,
-            } as React.CSSProperties
-          }
-        >
-          <span>{total}%</span>
+            <StickyNote size={22} />
+          </Link>
+          <Link className="avatar" to="/profile" aria-label={t('Your profile')}>
+            <UserRound size={24} />
+          </Link>
         </div>
-        <div>
-          <h3>{t('Your daily momentum')}</h3>
-          <p>{t('Every small action moves you forward.')}</p>
+      </header>
+      {showCalendar && (
+        <div className="week">
+          {week.map((d) => (
+            <button
+              disabled={localDate(d) > localDate()}
+              key={localDate(d)}
+              className={date === localDate(d) ? 'active' : ''}
+              onClick={() => setDate(localDate(d))}
+            >
+              <span>{d.toLocaleDateString(locale(), { weekday: 'short' })}</span>
+              <strong>{d.getDate()}</strong>
+              <i className={localDate(d) === localDate() ? 'today' : ''} />
+            </button>
+          ))}
         </div>
-        <Check size={22} />
-      </div>
+      )}
+      {showMomentum && (
+        <>
+          <Summary habits={habits} progress={progress} date={date} home />
+          <div className="momentum panel">
+            <div
+              className="ring"
+              style={
+                {
+                  background: `conic-gradient(#6B58E8 ${total}%,#F0ECFF 0)`,
+                  '--completion': `${total}%`,
+                } as React.CSSProperties
+              }
+            >
+              <span>{total}%</span>
+            </div>
+            <div>
+              <h3>{t('Your daily momentum')}</h3>
+              <p>{t('Every small action moves you forward.')}</p>
+            </div>
+            <Check size={22} />
+          </div>
+        </>
+      )}
       <div className="section-title">
         <h2>{date === localDate() ? t('Today’s habits') : t('Your habits')}</h2>
         <Link to="/habits">
@@ -331,7 +353,7 @@ function Dashboard() {
         </Link>
       </div>
       <DateSelector />
-      <SortableHabitList habits={active} progress={progress} date={date} />
+      <SortableHabitList habits={active} progress={progress} date={date} showSalah={showSalah} />
       {!active.length &&
         (habits.length ? (
           <div className="empty panel">
@@ -446,6 +468,7 @@ function Details() {
           </Button>
         </section>
       )}
+      <HabitMilestones habit={h} progress={history} />
       <HabitCalendar habits={[h]} progress={history} detail />
       <section className="panel">
         <h2>{t('Your rhythm')}</h2>
@@ -618,6 +641,7 @@ function Insights() {
           ))}
         </div>
       </section>
+      <WeeklyReview habits={habits} progress={progress} />
       <HabitCalendar habits={habits} progress={progress} />
       <div className="panel encouragement">
         <Heart size={28} />
@@ -696,6 +720,7 @@ function Shell() {
   return (
     <div className={focusSession ? 'app-shell has-focus' : 'app-shell'}>
       <AppUpdate />
+      <MilestoneCelebration />
       <FocusBar />
       <ReminderBanner due={reminders.due} dismiss={reminders.dismiss} />
       <aside className="desktop-brand">
@@ -722,6 +747,9 @@ function Shell() {
           <Route path="/habits/:id/edit" element={<HabitBuilder />} />
           <Route path="/insights" element={<Insights />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/notes" element={<Notes />} />
+          <Route path="/notes/new" element={<NoteEditor />} />
+          <Route path="/notes/:id" element={<NoteEditor />} />
           <Route
             path="/settings"
             element={
@@ -737,6 +765,7 @@ function Shell() {
                     <p>{t('Your space, your preferences.')}</p>
                   </div>
                 </header>
+                <HomeSettings />
                 <LanguageSettings />
                 <AppearanceSettings />
                 <ReminderSettings />

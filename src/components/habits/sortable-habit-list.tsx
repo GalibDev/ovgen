@@ -24,7 +24,9 @@ function SortableHabit({
   habit,
   progress,
   date,
+  showSalah = true,
 }: {
+  showSalah?: boolean;
   habit: Habit;
   progress?: Progress;
   date: string;
@@ -47,7 +49,7 @@ function SortableHabit({
       {...listeners}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <HabitCard habit={habit} progress={progress} date={date} />
+      <HabitCard habit={habit} progress={progress} date={date} showSalah={showSalah} />
     </div>
   );
 }
@@ -55,7 +57,9 @@ export function SortableHabitList({
   habits,
   progress,
   date,
+  showSalah = true,
 }: {
+  showSalah?: boolean;
   habits: Habit[];
   progress: Progress[];
   date: string;
@@ -89,6 +93,7 @@ export function SortableHabitList({
                 habit={h}
                 progress={progress.find((p) => p.habitId === h.id && p.date === date)}
                 date={date}
+                showSalah={showSalah}
               />
             ))}
           </div>

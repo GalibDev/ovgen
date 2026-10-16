@@ -12,7 +12,9 @@ export function Controls({
   habit: h,
   progress: p,
   date,
+  showSalah = true,
 }: {
+  showSalah?: boolean;
   habit: Habit;
   progress?: Progress;
   date: string;
@@ -21,6 +23,13 @@ export function Controls({
   const run = (task: Promise<unknown>) => {
     void task.catch(() => notify(t('Could not save progress. Please try again.')));
   };
+  const salah =
+    h.tracking === 'steps' &&
+    (h.name.toLowerCase().includes('salah') ||
+      h.name.includes('সালাত') ||
+      h.unit === 'prayers' ||
+      h.steps.some((step) => ['fajr', 'ফজর'].includes(step.name.toLowerCase())));
+  if (salah && !showSalah) return null;
   if (h.tracking === 'steps')
     return (
       <div className="steps">
@@ -87,7 +96,9 @@ export function HabitCard({
   habit: h,
   progress: p,
   date,
+  showSalah = true,
 }: {
+  showSalah?: boolean;
   habit: Habit;
   progress?: Progress;
   date: string;
@@ -203,7 +214,7 @@ export function HabitCard({
         {h.archived || h.paused ? (
           <p className="muted inactive-label">{t(h.archived ? t('Archived') : t('Paused'))}</p>
         ) : (
-          <Controls habit={h} progress={p} date={date} />
+          <Controls habit={h} progress={p} date={date} showSalah={showSalah} />
         )}
       </div>
     </article>
